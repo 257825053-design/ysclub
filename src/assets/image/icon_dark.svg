@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2B7FFF"/>
+      <stop offset="100%" stop-color="#0055FF"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#iconGrad)"
+    d="M 256 72
+       C 200 72, 160 112, 155 162
+       C 110 170, 78 210, 82 252
+       C 86 292, 122 320, 162 318
+       L 350 318
+       C 400 318, 438 280, 436 232
+       C 434 188, 400 156, 358 154
+       C 354 106, 312 72, 256 72 Z" />
+  <path fill="#FFFFFF"
+    d="M 170 300
+       L 215 190
+       L 260 270
+       L 310 160
+       L 360 300
+       Z" />
+  <path fill="none" stroke="url(#iconGrad)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"
+    d="M 130 370
+       Q 200 348 270 370
+       T 410 370" />
+</svg>
