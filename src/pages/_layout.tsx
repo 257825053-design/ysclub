@@ -316,23 +316,47 @@ const Layout = () => {
               <div
                 data-tauri-drag-region="true"
                 style={{
-                  height: '27px',
                   display: 'flex',
-                  justifyContent: 'space-between',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  gap: '2px',
                 }}
               >
-                <SvgIcon
-                  component={isDark ? iconDark : iconLight}
-                  style={{
-                    height: '36px',
-                    width: '36px',
-                    marginTop: '-3px',
-                    marginRight: '5px',
-                    marginLeft: '-3px',
-                  }}
-                  inheritViewBox
-                />
-                <LogoSvg fill={isDark ? 'white' : 'black'} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <SvgIcon
+                    component={isDark ? iconDark : iconLight}
+                    style={{
+                      height: '32px',
+                      width: '32px',
+                      flexShrink: 0,
+                    }}
+                    inheritViewBox
+                  />
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span
+                      style={{
+                        fontSize: '18px',
+                        fontWeight: 700,
+                        color: isDark ? '#FFFFFF' : '#000000',
+                        letterSpacing: '1px',
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      YSCLUB
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 600,
+                        color: '#1677FF',
+                        letterSpacing: '2px',
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      PRO MEMBER
+                    </span>
+                  </div>
+                </div>
               </div>
               <UpdateButton className="the-newbtn" />
             </div>

@@ -17,16 +17,16 @@ export const defaultTheme = {
   }`,
 }
 
-// dark mode
+// dark mode - YSCLUB Tech Theme
 export const defaultDarkTheme = {
   ...defaultTheme,
-  primary_color: '#0A84FF',
-  secondary_color: '#FF9F0A',
+  primary_color: '#1677FF',
+  secondary_color: '#4F46E5',
   primary_text: '#FFFFFF',
-  background_color: '#2E303D',
-  secondary_text: '#EBEBF599',
-  info_color: '#0A84FF',
-  error_color: '#FF453A',
-  warning_color: '#FF9F0A',
-  success_color: '#30D158',
+  background_color: '#080F24',
+  secondary_text: '#94A3B8',
+  info_color: '#1677FF',
+  error_color: '#EF4444',
+  warning_color: '#F59E0B',
+  success_color: '#22C55E',
 }
