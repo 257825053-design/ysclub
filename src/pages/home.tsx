@@ -356,6 +356,7 @@ QuickSelectCard.displayName = 'QuickSelectCard'
 // 代理模式选择
 const ModeSelector = memo(() => {
   const { t } = useTranslation()
+  const theme = useTheme()
   const { clashConfig } = useClashConfigData()
   const { isCoreDataPending } = useCoreDataStatus()
   const { refreshClashConfig } = useAppRefreshers()
@@ -402,7 +403,7 @@ const ModeSelector = memo(() => {
               bgcolor: currentMode === mode ? 'primary.main' : 'transparent',
               color: currentMode === mode ? 'primary.contrastText' : 'text.primary',
               '&:hover': {
-                bgcolor: currentMode === mode ? 'primary.dark' : alpha('primary.main', 0.08),
+                bgcolor: currentMode === mode ? 'primary.dark' : alpha(theme.palette.primary.main, 0.08),
               },
             }}
           >
@@ -703,6 +704,7 @@ TrafficStatsSection.displayName = 'TrafficStatsSection'
 // 快捷工具栏
 const QuickTools = memo(() => {
   const { t } = useTranslation()
+  const theme = useTheme()
   const navigate = useNavigate()
   const { sysproxy } = useSystemData()
   const isConnected = sysproxy?.enable
@@ -771,7 +773,7 @@ const QuickTools = memo(() => {
             gap: 1,
             '&:hover': {
               borderColor: 'primary.main',
-              bgcolor: alpha('primary.main', 0.05),
+              bgcolor: alpha(theme.palette.primary.main, 0.05),
             },
             '&.Mui-disabled': {
               color: alpha('#64748B', 0.3),
