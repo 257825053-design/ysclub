@@ -16,18 +16,21 @@ body {
 }
 
 :root {
-  --primary-main: #1677FF;
+  --primary-main: #2378F5;
   --text-primary: #FFFFFF;
-  --selection-color: #111B35;
+  --text-secondary: #D0D8E8;
+  --text-tertiary: #8A98B5;
+  --selection-color: #141C30;
   --scroller-color: #334155;
-  --background-color: #080F24;
-  --background-color-alpha: rgba(22, 119, 255, 0.1);
+  --background-color: #0B101C;
+  --background-color-alpha: rgba(35, 120, 245, 0.1);
   --border-radius: 16px;
-  --card-bg: #111B35;
-  --card-bg-hover: #1a2744;
+  --card-bg: #141C30;
+  --card-bg-hover: #1A2744;
   --divider-color: rgba(255, 255, 255, 0.06);
-  --glass-bg: rgba(15, 23, 42, 0.85);
+  --glass-bg: rgba(15, 22, 38, 0.85);
   --nav-width: 240px;
+  --success-color: #36D399;
 }
 
 ::selection {
@@ -67,8 +70,8 @@ body {
 
 /* YSCLUB Tech Theme Animations */
 @keyframes breathe {
-  0%, 100% { box-shadow: 0 0 8px rgba(22, 119, 255, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(22, 119, 255, 0.6); }
+  0%, 100% { box-shadow: 0 0 8px rgba(35, 120, 245, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(35, 120, 245, 0.6); }
 }
 
 @keyframes pulse-dot {

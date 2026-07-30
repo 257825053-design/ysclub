@@ -1,0 +1,155 @@
+import { Box, Typography, alpha } from '@mui/material'
+import { ArrowDownwardRounded, ArrowUpwardRounded, DonutLargeOutlined } from '@mui/icons-material'
+import { memo } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import { EnhancedCanvasTrafficGraph } from '@/components/home/enhanced-canvas-traffic-graph'
+import { useTrafficData } from '@/hooks/use-traffic-data'
+import { useVisibility } from '@/hooks/use-visibility'
+import parseTraffic from '@/utils/parse-traffic'
+
+/**
+ * TrafficCard - 实时流量卡片
+ *
+ * 设计规格：
+ * - 深色背景 #12192B
+ * - 标题 "实时流量" + "TRAFFIC"
+ * - 右上角：下载(蓝)/上传(绿)图例标签按钮
+ * - 折线流量图表（蓝色下载曲线+渐变填充、绿色上传曲线+渐变填充、圆点采样节点）
+ * - 数据面板：下载速度、上传速度、总流量
+ */
+const TrafficCard = memo(() => {
+  const { t } = useTranslation()
+  const pageVisible = useVisibility()
+  const {
+    response: { data: traffic },
+  } = useTrafficData({ enabled: pageVisible })
+
+  const [down, downUnit] = parseTraffic(traffic?.down || 0)
+  const [up, upUnit] = parseTraffic(traffic?.up || 0)
+  const [totalDown, totalDownUnit] = parseTraffic(traffic?.downTotal || 0)
+
+  return (
+    <Box
+      sx={{
+        p: 1.5,
+        borderRadius: 2.5,
+        background: '#12192B',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1,
+      }}
+    >
+      {/* 标题 + 右上角下载/上传图例 */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
+          <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
+            实时流量
+          </Typography>
+          <Typography sx={{ fontSize: 9, color: '#8A98B5', letterSpacing: '1px', fontWeight: 500 }}>
+            TRAFFIC
+          </Typography>
+        </Box>
+        {/* 下载/上传图例标签 */}
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.3,
+              px: 0.75,
+              py: 0.2,
+              borderRadius: 1,
+              bgcolor: alpha('#2378F5', 0.1),
+              border: `1px solid ${alpha('#2378F5', 0.2)}`,
+            }}
+          >
+            <ArrowDownwardRounded sx={{ fontSize: 12, color: '#2378F5' }} />
+            <Typography sx={{ fontSize: 10, color: '#2378F5', fontWeight: 500 }}>
+              下载
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.3,
+              px: 0.75,
+              py: 0.2,
+              borderRadius: 1,
+              bgcolor: alpha('#36D399', 0.1),
+              border: `1px solid ${alpha('#36D399', 0.2)}`,
+            }}
+          >
+            <ArrowUpwardRounded sx={{ fontSize: 12, color: '#36D399' }} />
+            <Typography sx={{ fontSize: 10, color: '#36D399', fontWeight: 500 }}>
+              上传
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* 流量图 */}
+      <Box
+        sx={{
+          height: 45,
+          borderRadius: 1.5,
+          overflow: 'hidden',
+          bgcolor: 'rgba(0, 0, 0, 0.2)',
+          border: '1px solid rgba(255, 255, 255, 0.03)',
+        }}
+      >
+        <EnhancedCanvasTrafficGraph compact />
+      </Box>
+
+      {/* 数据面板 */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          pt: 1,
+          borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+        }}
+      >
+        {/* 下载速度 */}
+        <Box sx={{ textAlign: 'center', flex: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.3 }}>
+            <ArrowDownwardRounded sx={{ fontSize: 14, color: '#2378F5' }} />
+            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace' }}>
+              {down} {downUnit}/s
+            </Typography>
+          </Box>
+          <Typography sx={{ fontSize: 9, color: '#8A98B5' }}>下载速度</Typography>
+        </Box>
+
+        {/* 上传速度 */}
+        <Box sx={{ textAlign: 'center', flex: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.3 }}>
+            <ArrowUpwardRounded sx={{ fontSize: 14, color: '#36D399' }} />
+            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace' }}>
+              {up} {upUnit}/s
+            </Typography>
+          </Box>
+          <Typography sx={{ fontSize: 9, color: '#8A98B5' }}>上传速度</Typography>
+        </Box>
+
+        {/* 总流量 */}
+        <Box sx={{ textAlign: 'center', flex: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.3 }}>
+            <DonutLargeOutlined sx={{ fontSize: 14, color: '#2378F5' }} />
+            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace' }}>
+              {totalDown} {totalDownUnit}
+            </Typography>
+          </Box>
+          <Typography sx={{ fontSize: 9, color: '#8A98B5' }}>总流量</Typography>
+        </Box>
+      </Box>
+    </Box>
+  )
+})
+
+TrafficCard.displayName = 'TrafficCard'
+
+export default TrafficCard

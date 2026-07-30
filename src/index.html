@@ -11,17 +11,9 @@
     <title>YSCLUB</title>
     <style>
       :root {
-        --bg-color: #f5f5f5;
-        --text-color: #333;
-        color-scheme: light;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg-color: #2e303d;
-          --text-color: #ffffff;
-          color-scheme: dark;
-        }
+        --bg-color: #080F24;
+        --text-color: #ffffff;
+        color-scheme: dark;
       }
 
       html,
@@ -30,6 +22,7 @@
         height: 100%;
         margin: 0;
         color: var(--text-color);
+        background: var(--bg-color);
       }
 
       #root {
@@ -50,6 +43,529 @@
         pointer-events: none;
       }
     </style>
+    <script>
+      // ===== Tauri API Mock for browser preview =====
+      // Only set up if not in a real Tauri environment
+      (function () {
+        if (window.__TAURI_INTERNALS__) return;
+
+        var _callbackId = 0;
+        var _callbacks = {};
+        var _eventIdCounter = 0;
+        var _wsIdCounter = 0;
+        var _activeIntervals = [];
+
+        // ===== Mock data =====
+        var mockVergeConfig = {
+          theme_mode: 'dark',
+          enable_system_proxy: true,
+          enable_tun_mode: false,
+          traffic_graph: true,
+          collapse_navbar: false,
+          menu_icon: 'monochrome',
+          menu_order: null,
+          language: 'zh',
+          notice_position: 'top-right',
+          enable_auto_launch: false,
+          enable_silent_start: false,
+          enable_global_mode: false,
+          proxy_auto_config: false,
+          proxy_guard: false,
+          proxy_guard_interval: 10,
+          test_latency_url: 'https://www.gstatic.com/generate_204',
+          enable_builtin_enhanced: true,
+          auto_close_connection: true,
+          auto_check_update: false,
+          enable_random_port: false,
+          verge_mixed_port: 7897,
+          enable_external_controller: true,
+          external_controller_host: '127.0.0.1',
+          external_controller_port: 9097,
+          enable_web_ui: false,
+          web_ui_port: 9099,
+          window_width: 900,
+          window_height: 600,
+          window_maximized: false,
+          window_fullscreen: false,
+          tray_event: 'main_window',
+          close_to_tray: true,
+          enable_dns_settings: false,
+          dns_mode: 'fake-ip',
+          enable_traffic_graph: true,
+          enable_memory_graph: true,
+        };
+
+        var mockProfiles = {
+          current: 'mock-1',
+          items: [
+            {
+              uid: 'mock-1',
+              name: 'YSCLUB Premium',
+              type: 'remote',
+              url: 'https://example.com/sub',
+              updated: Date.now(),
+              selected: true,
+              extra: {
+                upload: 1073741824,
+                download: 5368709120,
+                total: 107374182400,
+                expire: 1893456000,
+              },
+            },
+          ],
+        };
+
+        var mockClashInfo = {
+          version: 'v1.18.10',
+          core: 'verge-mihomo',
+          port: 7897,
+          mode: 'rule',
+          external_controller: '127.0.0.1:9097',
+          secret: '',
+        };
+
+        var usNode1 = 'US United States 01';
+        var usNode2 = 'US United States 02';
+        var hkNode = 'HK Hong Kong 01';
+        var jpNode = 'JP Japan 01';
+        var sgNode = 'SG Singapore 01';
+        var allNodes = [usNode1, usNode2, hkNode, jpNode, sgNode];
+
+        var mockProxyView = {
+          groups: [
+            { name: 'GLOBAL', type: 'Selector', now: usNode1, hidden: false, icon: '', all: allNodes },
+            { name: 'Proxy', type: 'Selector', now: jpNode, hidden: false, icon: '', all: allNodes },
+            { name: 'Auto', type: 'URLTest', now: sgNode, hidden: false, icon: '', all: allNodes },
+          ],
+        };
+
+        var mockSystemInfo = {
+          sysproxy: { enable: true, host: '127.0.0.1', port: 7897 },
+          runningMode: 'Service',
+          appDir: '',
+          osInfo: 'Windows 11',
+        };
+
+        var mockMihomoVersion = 'v1.18.10';
+
+        function makeMockProxy(name, type, history) {
+          return {
+            name: name,
+            type: type,
+            udp: true,
+            history: history || [{ time: '', delay: 45 }],
+            all: type === 'Selector' || type === 'URLTest' ? mockProxyView.groups[0].all : undefined,
+            now: type === 'Selector' || type === 'URLTest' ? mockProxyView.groups[0].now : undefined,
+            hidden: false,
+            icon: '',
+          };
+        }
+
+        var mockProxies = {
+          proxies: {
+            'GLOBAL': makeMockProxy('GLOBAL', 'Selector'),
+            'Proxy': makeMockProxy('Proxy', 'Selector'),
+            'Auto': makeMockProxy('Auto', 'URLTest'),
+            'US United States 01': makeMockProxy(usNode1, 'Vmess'),
+            'US United States 02': makeMockProxy(usNode2, 'Vmess'),
+            'HK Hong Kong 01': makeMockProxy(hkNode, 'Vmess'),
+            'JP Japan 01': makeMockProxy(jpNode, 'Vmess'),
+            'SG Singapore 01': makeMockProxy(sgNode, 'Vmess'),
+          },
+        };
+
+        var mockGroups = {
+          groups: mockProxyView.groups.map(function (g) {
+            return {
+              name: g.name,
+              type: g.type,
+              now: g.now,
+              icon: g.icon,
+              all: g.all.map(function (name) {
+                return {
+                  name: name,
+                  type: 'Vmess',
+                  udp: true,
+                  history: [{ time: '', delay: Math.floor(Math.random() * 100) + 20 }],
+                  hidden: false,
+                  icon: '',
+                };
+              }),
+            };
+          }),
+        };
+
+        var mockConnections = {
+          downloadTotal: 5368709120,
+          uploadTotal: 1073741824,
+          connections: [
+            {
+              id: 'mock-conn-1',
+              upload: 1024,
+              download: 2048,
+              start: new Date().toISOString(),
+              chains: ['Proxy'],
+              rule: 'DOMAIN-SUFFIX',
+              rulePayload: 'google.com',
+              metadata: {
+                network: 'tcp',
+                type: 'http',
+                sourceIP: '127.0.0.1',
+                destinationIP: '142.250.80.46',
+                sourcePort: '12345',
+                destinationPort: '443',
+                host: 'www.google.com',
+              },
+            },
+          ],
+          activeConnectionCount: 3,
+        };
+
+        var mockRules = { rules: [{ type: 'DOMAIN-SUFFIX', payload: 'google.com', proxy: 'Proxy' }] };
+        var mockRuleProviders = { providers: {} };
+
+        // ===== Helper: send mock data through a Channel =====
+        function startChannelData(channelId, dataGenerator, intervalMs) {
+          var index = 0;
+          var interval = setInterval(function () {
+            try {
+              var data = dataGenerator(index);
+              __TAURI_INTERNALS__.runCallback(channelId, { index: index, message: data });
+              index++;
+            } catch (e) {
+              console.error('[mock] channel data error:', e);
+            }
+          }, intervalMs || 1000);
+          _activeIntervals.push(interval);
+          return interval;
+        }
+
+        // ===== Build the mock __TAURI_INTERNALS__ =====
+        var __TAURI_INTERNALS__ = {
+          callbacks: _callbacks,
+
+          transformCallback: function (callback, once) {
+            var id = ++_callbackId;
+            _callbacks[id] = { callback: callback, once: !!once };
+            return id;
+          },
+
+          unregisterCallback: function (id) {
+            delete _callbacks[id];
+          },
+
+          runCallback: function (id) {
+            var args = Array.prototype.slice.call(arguments, 1);
+            var cb = _callbacks[id];
+            if (cb) {
+              try {
+                cb.callback.apply(null, args);
+              } catch (e) {
+                console.error('[mock] callback error:', e);
+              }
+              if (cb.once) {
+                delete _callbacks[id];
+              }
+            }
+          },
+
+          convertFileSrc: function (filePath, protocol) {
+            return filePath;
+          },
+
+          metadata: {
+            currentWindow: { label: 'main', title: 'YSCLUB' },
+            currentWebview: { windowLabel: 'main', label: 'main' },
+            windows: [{ label: 'main', title: 'YSCLUB' }],
+            webviews: [{ windowLabel: 'main', label: 'main' }],
+          },
+
+          plugins: {
+            path: {
+              sep: '\\',
+              delimiter: ';',
+              baseDirectory: function () { return 'C:\\Users\\YSCLUB'; },
+            },
+          },
+
+          invoke: function (cmd, args, options) {
+            args = args || {};
+
+            // ===== Event commands =====
+            if (cmd === 'plugin:event|listen') {
+              var eventId = ++_eventIdCounter;
+              return Promise.resolve(eventId);
+            }
+            if (cmd === 'plugin:event|unlisten') {
+              return Promise.resolve();
+            }
+            if (cmd === 'plugin:event|emit' || cmd === 'plugin:event|emit_to') {
+              return Promise.resolve();
+            }
+
+            // ===== Window commands (plugin:window|*) =====
+            if (cmd.indexOf('plugin:window|') === 0 || cmd.indexOf('window:') === 0) {
+              var winCmd = cmd.replace(/^(plugin:window\||window:)/, '');
+              if (winCmd === 'is_maximized') return Promise.resolve(false);
+              if (winCmd === 'scale_factor') return Promise.resolve(1);
+              if (winCmd === 'inner_position') return Promise.resolve({ x: 0, y: 0, Logical: { x: 0, y: 0 }, Physical: { x: 0, y: 0 } });
+              if (winCmd === 'outer_position') return Promise.resolve({ x: 0, y: 0, Logical: { x: 0, y: 0 }, Physical: { x: 0, y: 0 } });
+              if (winCmd === 'outer_size') return Promise.resolve({ width: 900, height: 600, Logical: { width: 900, height: 600 }, Physical: { width: 900, height: 600 } });
+              if (winCmd === 'inner_size') return Promise.resolve({ width: 900, height: 600, Logical: { width: 900, height: 600 }, Physical: { width: 900, height: 600 } });
+              if (winCmd === 'is_decorated') return Promise.resolve(true);
+              if (winCmd === 'is_visible' || winCmd === 'isVisible') return Promise.resolve(true);
+              if (winCmd === 'is_focused' || winCmd === 'isFocused') return Promise.resolve(true);
+              if (winCmd === 'current_monitor') return Promise.resolve({ name: 'Main Monitor', scaleFactor: 1, size: { width: 1920, height: 1080 }, position: { x: 0, y: 0 } });
+              if (winCmd === 'theme') return Promise.resolve('Dark');
+              if (winCmd === 'set_title' || winCmd === 'setTitle') return Promise.resolve();
+              if (winCmd === 'minimize' || winCmd === 'toggle_maximize' || winCmd === 'close' || winCmd === 'hide' || winCmd === 'show' || winCmd === 'set_focus' || winCmd === 'set_focus' || winCmd === 'maximize' || winCmd === 'unmaximize') return Promise.resolve();
+              if (winCmd === 'set_decorations' || winCmd === 'set_skip_taskbar' || winCmd === 'set_always_on_top' || winCmd === 'set_resizable') return Promise.resolve();
+              if (winCmd === 'set_size' || winCmd === 'set_position' || winCmd === 'set_min_size' || winCmd === 'set_max_size') return Promise.resolve();
+              if (winCmd === 'center') return Promise.resolve();
+              if (winCmd === 'start_dragging') return Promise.resolve();
+              return Promise.resolve();
+            }
+
+            // ===== Path commands =====
+            if (cmd.indexOf('plugin:path|') === 0) {
+              var pathCmd = cmd.replace('plugin:path|', '');
+              var mockPaths = {
+                'app_data_dir': 'C:\\Users\\YSCLUB\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev',
+                'app_config_dir': 'C:\\Users\\YSCLUB\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev',
+                'app_cache_dir': 'C:\\Users\\YSCLUB\\AppData\\Local\\io.github.clash-verge-rev.clash-verge-rev\\Cache',
+                'app_log_dir': 'C:\\Users\\YSCLUB\\AppData\\Local\\io.github.clash-verge-rev.clash-verge-rev\\logs',
+                'download_dir': 'C:\\Users\\YSCLUB\\Downloads',
+                'home_dir': 'C:\\Users\\YSCLUB',
+                'document_dir': 'C:\\Users\\YSCLUB\\Documents',
+                'data_dir': 'C:\\Users\\YSCLUB\\AppData\\Roaming',
+                'local_data_dir': 'C:\\Users\\YSCLUB\\AppData\\Local',
+                'config_dir': 'C:\\Users\\YSCLUB\\AppData\\Roaming',
+              };
+              if (mockPaths[pathCmd]) return Promise.resolve(mockPaths[pathCmd]);
+              if (pathCmd === 'resolve' || pathCmd === 'join') {
+                var paths = args.paths || [];
+                return Promise.resolve(paths.join('\\'));
+              }
+              if (pathCmd === 'sep') return Promise.resolve('\\');
+              return Promise.resolve('C:\\Users\\YSCLUB');
+            }
+
+            // ===== Mihomo commands =====
+            if (cmd.indexOf('plugin:mihomo|') === 0) {
+              var mihomoCmd = cmd.replace('plugin:mihomo|', '');
+
+              // Channel-based commands (WebSocket)
+              if (args.onMessage && typeof args.onMessage === 'object' && args.onMessage.id !== undefined) {
+                var channelId = args.onMessage.id;
+                var wsId = ++_wsIdCounter;
+
+                if (mihomoCmd === 'ws_traffic' || mihomoCmd === 'traffic') {
+                  startChannelData(channelId, function (i) {
+                    return {
+                      up: Math.floor(Math.random() * 500000) + 50000,
+                      down: Math.floor(Math.random() * 2000000) + 200000,
+                    };
+                  }, 1000);
+                } else if (mihomoCmd === 'ws_memory' || mihomoCmd === 'memory') {
+                  startChannelData(channelId, function (i) {
+                    return { inuse: Math.floor(Math.random() * 50000000) + 20000000 };
+                  }, 2000);
+                } else if (mihomoCmd === 'ws_logs' || mihomoCmd === 'logs') {
+                  startChannelData(channelId, function (i) {
+                    var levels = ['info', 'warning', 'error'];
+                    var level = levels[Math.floor(Math.random() * levels.length)];
+                    var msgs = [
+                      '[TCP] 127.0.0.1:12345 --> www.google.com:443',
+                      '[DNS] resolving www.google.com',
+                      '[Rule] DOMAIN-SUFFIX,google.com match',
+                      '[Proxy] Proxy -> Japan 01',
+                    ];
+                    return level + ' ' + msgs[Math.floor(Math.random() * msgs.length)];
+                  }, 2000);
+                } else if (mihomoCmd === 'ws_connections' || mihomoCmd === 'connections') {
+                  startChannelData(channelId, function (i) {
+                    return {
+                      downloadTotal: 5368709120 + i * 1024,
+                      uploadTotal: 1073741824 + i * 512,
+                      connections: mockConnections.connections,
+                      activeConnectionCount: Math.floor(Math.random() * 10) + 1,
+                    };
+                  }, 1000);
+                }
+
+                return Promise.resolve(wsId);
+              }
+
+              // Regular mihomo commands
+              var mihomoMocks = {
+                'get_version': mockMihomoVersion,
+                'get_proxies': mockProxies,
+                'get_groups': mockGroups,
+                'get_group_by_name': mockGroups.groups[0],
+                'get_connections': mockConnections,
+                'get_rules': mockRules,
+                'get_rule_providers': mockRuleProviders,
+                'get_proxy_providers': { providers: {} },
+                'get_base_config': { mode: 'rule', 'mixed-port': 7897, 'log-level': 'info' },
+                'flush_fakeip': null,
+                'flush_dns': null,
+                'close_all_connections': null,
+                'close_connection': null,
+                'reload_config': null,
+                'patch_base_config': null,
+                'update_geo': null,
+                'update_controller': null,
+                'update_secret': null,
+                'restart': null,
+                'upgrade_core': null,
+                'upgrade_ui': null,
+                'upgrade_geo': null,
+                'clear_all_ws_connections': null,
+                'delay_group': { delay: 45 },
+                'delay_proxy_by_name': { delay: 45 },
+                'healthcheck_proxy_provider': null,
+                'select_node_for_group': null,
+                'unfixed_proxy': null,
+                'update_proxy_provider': null,
+              };
+              if (mihomoMocks[mihomoCmd] !== undefined) {
+                return Promise.resolve(mihomoMocks[mihomoCmd]);
+              }
+              console.log('[mock] unknown mihomo command:', mihomoCmd);
+              return Promise.resolve(null);
+            }
+
+            // ===== Plugin listener registration =====
+            if (cmd.indexOf('plugin:') === 0 && cmd.indexOf('|register_listener') >= 0) {
+              return Promise.resolve();
+            }
+            if (cmd.indexOf('plugin:') === 0 && cmd.indexOf('|remove_listener') >= 0) {
+              return Promise.resolve();
+            }
+            if (cmd.indexOf('plugin:') === 0 && cmd.indexOf('|check_permissions') >= 0) {
+              return Promise.resolve('granted');
+            }
+            if (cmd.indexOf('plugin:') === 0 && cmd.indexOf('|request_permissions') >= 0) {
+              return Promise.resolve('granted');
+            }
+
+            // ===== Clipboard commands =====
+            if (cmd === 'plugin:clipboard-manager|write_text') return Promise.resolve();
+            if (cmd === 'plugin:clipboard-manager|read_text') return Promise.resolve('');
+
+            // ===== Dialog commands =====
+            if (cmd === 'plugin:dialog|open') return Promise.resolve(null);
+            if (cmd === 'plugin:dialog|save') return Promise.resolve(null);
+            if (cmd === 'plugin:dialog|message' || cmd === 'plugin:dialog|ask' || cmd === 'plugin:dialog|confirm') {
+              return Promise.resolve(true);
+            }
+
+            // ===== FS commands =====
+            if (cmd.indexOf('plugin:fs|') === 0) {
+              if (cmd === 'plugin:fs|read_text_file') return Promise.resolve('');
+              if (cmd === 'plugin:fs|exists') return Promise.resolve(false);
+              if (cmd === 'plugin:fs|read_dir') return Promise.resolve([]);
+              return Promise.resolve();
+            }
+
+            // ===== Shell commands =====
+            if (cmd.indexOf('plugin:shell|') === 0) {
+              return Promise.resolve();
+            }
+
+            // ===== Updater commands =====
+            if (cmd.indexOf('plugin:updater|') === 0) {
+              if (cmd === 'plugin:updater|check') return Promise.resolve(null);
+              return Promise.resolve();
+            }
+
+            // ===== Verge config commands =====
+            var vergeMocks = {
+              'get_verge_config': mockVergeConfig,
+              'patch_verge_config': null,
+              'get_profiles': mockProfiles,
+              'patch_profiles_config': null,
+              'create_profile': null,
+              'view_profile': null,
+              'read_profile_file': '',
+              'save_profile_file': { status: 'valid' },
+              'import_profile': null,
+              'reorder_profile': null,
+              'update_profile': null,
+              'delete_profile': null,
+              'patch_profile': null,
+              'get_clash_info': mockClashInfo,
+              'get_clash_mode': 'rule',
+              'get_runtime_config': { mode: 'rule', 'mixed-port': 7897, 'log-level': 'info' },
+              'get_runtime_yaml': 'mixed-port: 7897\nmode: rule\nlog-level: info\n',
+              'get_runtime_logs': {},
+              'get_proxy_view': mockProxyView,
+              'get_clash_logs': [],
+              'get_system_info': mockSystemInfo,
+              'get_sysproxy': mockSystemInfo.sysproxy,
+              'get_sys_proxy': mockSystemInfo.sysproxy,
+              'get_running_mode': 'Service',
+              'get_service_info': { status: 'running', name: 'clash-verge-service' },
+              'enhance_profiles': { status: 'valid' },
+              'patch_clash_mode': null,
+              'restart_core': null,
+              'get_app_uptime': 3600,
+              'get_app_dir': 'C:\\Users\\YSCLUB\\AppData\\Roaming\\io.github.clash-verge-rev.clash-verge-rev',
+              'get_network_interfaces': [],
+              'get_network_interfaces_info': [],
+              'get_system_hostname': 'YSCLUB-PC',
+              'get_embedded_server_port': 33333,
+              'list_local_backup': [],
+              'list_webdav_backup': [],
+              'copy_clash_env': null,
+              'open_core_dir': null,
+              'open_logs_dir': null,
+              'open_app_dir': null,
+              'open_data_dir': null,
+              'service_install': null,
+              'service_uninstall': null,
+              'service_start': null,
+              'service_stop': null,
+              'get_service_status': 'running',
+              'get_service_log': '',
+              'update_profiles_config': null,
+              'get_clash_ports': { 'mixed-port': 7897 },
+              'change_clash_core': null,
+              'get_running_mode': 'Service',
+              'get_auto_launch': false,
+              'enable_auto_launch': null,
+              'disable_auto_launch': null,
+              'get_webdav_config': { url: '', username: '' },
+              'patch_webdav_config': null,
+              'webdav_backup': null,
+              'webdav_restore': null,
+              'create_webdav_backup': null,
+              'restore_webdav_backup': null,
+              'delete_webdav_backup': null,
+              'get_clash_core': 'verge-mihomo',
+              'get_app_version': '2.5.3',
+            };
+
+            if (vergeMocks[cmd] !== undefined) {
+              return Promise.resolve(vergeMocks[cmd]);
+            }
+
+            // ===== Catch-all =====
+            console.log('[mock] invoke (unhandled):', cmd);
+            return Promise.resolve(null);
+          },
+        };
+
+        // Install mock
+        Object.defineProperty(window, '__TAURI_INTERNALS__', {
+          value: __TAURI_INTERNALS__,
+          writable: false,
+          configurable: false,
+        });
+
+        console.log('[mock] Tauri API mock initialized for browser preview');
+      })();
+    </script>
   </head>
   <body>
     <div id="initial-loading-overlay"></div>

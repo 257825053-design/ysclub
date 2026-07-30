@@ -85,6 +85,7 @@ const STALE_DATA_THRESHOLD = 2500 // ms without fresh data => drop FPS
 
 interface EnhancedCanvasTrafficGraphProps {
   ref?: Ref<EnhancedCanvasTrafficGraphRef>
+  compact?: boolean
 }
 
 const isSameTrafficData = (
@@ -123,6 +124,7 @@ const displayDataReducer = (
 export const EnhancedCanvasTrafficGraph = memo(
   function EnhancedCanvasTrafficGraph({
     ref,
+    compact = false,
   }: EnhancedCanvasTrafficGraphProps) {
     const theme = useTheme()
     const { t } = useTranslation()
@@ -803,6 +805,17 @@ export const EnhancedCanvasTrafficGraph = memo(
         }
 
         ctx.stroke()
+
+        // 绘制圆点采样节点
+        const pointInterval = Math.max(1, Math.floor(data.length / 20))
+        ctx.fillStyle = color
+        ctx.globalAlpha = GRAPH_CONFIG.alpha.line
+        for (let i = 0; i < data.length; i += pointInterval) {
+          ctx.beginPath()
+          ctx.arc(getX(i), getY(i), 1.5, 0, Math.PI * 2)
+          ctx.fill()
+        }
+
         ctx.restore()
       },
       [calculateY, chartStyle],
@@ -1126,6 +1139,7 @@ export const EnhancedCanvasTrafficGraph = memo(
         )}
 
         {/* 控制层覆盖 */}
+        {!compact && (
         <Box
           sx={{
             position: 'absolute',
@@ -1230,6 +1244,8 @@ export const EnhancedCanvasTrafficGraph = memo(
               fps: currentFPS,
             })}
           </Box>
+        </Box>
+        )}
 
           {/* 悬浮提示框 */}
           {tooltipData.visible && (
@@ -1267,7 +1283,6 @@ export const EnhancedCanvasTrafficGraph = memo(
               </Box>
             </Box>
           )}
-        </Box>
       </Box>
     )
   },

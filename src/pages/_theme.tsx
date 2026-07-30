@@ -17,16 +17,16 @@ export const defaultTheme = {
   }`,
 }
 
-// dark mode - YSCLUB Tech Theme
+// dark mode - YSCLUB Tech Theme (Pixel-Perfect Design Spec)
 export const defaultDarkTheme = {
   ...defaultTheme,
-  primary_color: '#1677FF',
+  primary_color: '#2378F5',
   secondary_color: '#4F46E5',
   primary_text: '#FFFFFF',
-  background_color: '#080F24',
-  secondary_text: '#94A3B8',
-  info_color: '#1677FF',
+  background_color: '#0B101C',
+  secondary_text: '#D0D8E8',
+  info_color: '#2378F5',
   error_color: '#EF4444',
   warning_color: '#F59E0B',
-  success_color: '#22C55E',
+  success_color: '#36D399',
 }

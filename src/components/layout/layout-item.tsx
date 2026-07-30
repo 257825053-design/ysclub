@@ -36,14 +36,14 @@ interface Props {
 
 // Navigation label mapping: Chinese -> English subtitle
 const NAV_SUBTITLES: Record<string, string> = {
-  '首页': 'Dashboard',
-  '代理': 'Proxy',
-  '订阅': 'Subscription',
-  '连接': 'Connection',
-  '规则': 'Rules',
-  '日志': 'Logs',
-  '测试': 'Speed Test',
-  '设置': 'Settings',
+  '首 页': 'Dashboard',
+  '代 理': 'Proxy',
+  '订 阅': 'Nodes',
+  '连 接': 'Connection',
+  '规 则': 'Rules',
+  '日 志': 'Logs',
+  '测 试': 'Speed Test',
+  '设 置': 'Settings',
 }
 
 export const LayoutItem = (props: Props) => {
@@ -102,8 +102,8 @@ export const LayoutItem = (props: Props) => {
             width: '3px',
             height: '24px',
             borderRadius: '0 4px 4px 0',
-            background: 'linear-gradient(180deg, #1677FF, #4F46E5)',
-            boxShadow: '0 0 8px rgba(22, 119, 255, 0.6)',
+            background: 'linear-gradient(180deg, #2378F5, #4F46E5)',
+            boxShadow: '0 0 8px rgba(35, 120, 245, 0.6)',
             zIndex: 2,
           }}
         />
@@ -130,9 +130,9 @@ export const LayoutItem = (props: Props) => {
           },
           isSelected
             ? {
-                backgroundColor: 'rgba(22, 119, 255, 0.18) !important',
+                backgroundColor: 'rgba(35, 120, 245, 0.18) !important',
                 '&:hover': {
-                  backgroundColor: 'rgba(22, 119, 255, 0.22) !important',
+                  backgroundColor: 'rgba(35, 120, 245, 0.22) !important',
                 },
               }
             : {
@@ -149,9 +149,9 @@ export const LayoutItem = (props: Props) => {
         {(effectiveMenuIcon === 'monochrome' || !effectiveMenuIcon) && (
           <ListItemIcon
             sx={{
-              color: isSelected ? '#1677FF' : 'text.secondary',
-              marginLeft: '6px',
-              cursor: draggable ? 'grab' : 'inherit',
+              color: isSelected ? '#2378F5' : 'text.secondary',
+            marginLeft: '6px',
+            cursor: draggable ? 'grab' : 'inherit',
               minWidth: 36,
             }}
           >
@@ -161,9 +161,9 @@ export const LayoutItem = (props: Props) => {
         {effectiveMenuIcon === 'colorful' && (
           <ListItemIcon
             sx={{
-              color: isSelected ? '#1677FF' : 'text.secondary',
-              cursor: draggable ? 'grab' : 'inherit',
-              minWidth: 36,
+              color: isSelected ? '#2378F5' : 'text.secondary',
+          cursor: draggable ? 'grab' : 'inherit',
+          minWidth: 36,
             }}
           >
             {icon[1]}
@@ -193,7 +193,7 @@ export const LayoutItem = (props: Props) => {
                   sx={{
                     fontSize: 11,
                     color: isSelected
-                      ? 'rgba(22, 119, 255, 0.7)'
+                      ? 'rgba(35, 120, 245, 0.7)'
                       : 'rgba(148, 163, 184, 0.6)',
                     lineHeight: 1.2,
                     mt: '1px',

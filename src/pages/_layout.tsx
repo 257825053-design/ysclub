@@ -34,6 +34,7 @@ import LogoSvg from '@/assets/image/logo.svg?react'
 import { BaseErrorBoundary } from '@/components/base'
 import { LayoutItem } from '@/components/layout/layout-item'
 import { LayoutTraffic } from '@/components/layout/layout-traffic'
+import ConnectionPanel from '@/components/home/connection-panel'
 import { NoticeManager } from '@/components/layout/notice-manager'
 import { ServiceMigrationDialog } from '@/components/layout/service-migration-dialog'
 import { UpdateButton } from '@/components/layout/update-button'
@@ -348,7 +349,7 @@ const Layout = () => {
                       style={{
                         fontSize: '10px',
                         fontWeight: 600,
-                        color: '#1677FF',
+                        color: '#2378F5',
                         letterSpacing: '2px',
                         lineHeight: 1.2,
                       }}
@@ -469,7 +470,7 @@ const Layout = () => {
             </Menu>
 
             <div className="the-traffic">
-              <LayoutTraffic />
+              <ConnectionPanel />
             </div>
           </div>
 
