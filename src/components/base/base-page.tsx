@@ -9,10 +9,11 @@ interface Props {
   contentStyle?: React.CSSProperties
   children?: ReactNode
   full?: boolean
+  noScroll?: boolean
 }
 
 export const BasePage: React.FC<Props> = (props) => {
-  const { title, header, contentStyle, full, children } = props
+  const { title, header, contentStyle, full, noScroll, children } = props
 
   return (
     <BaseErrorBoundary>
@@ -46,6 +47,7 @@ export const BasePage: React.FC<Props> = (props) => {
           <section
             style={{
               backgroundColor: '#0B101C',
+              overflow: noScroll ? 'hidden' : undefined,
             }}
           >
             <div className="base-content" style={contentStyle}>

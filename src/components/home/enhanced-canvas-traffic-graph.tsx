@@ -56,10 +56,10 @@ const LINE_WIDTH_DOWN = 2.5
 const LINE_WIDTH_GRID = 0.5
 const ALPHA_GRADIENT = 0.15 // 降低渐变透明度
 const ALPHA_LINE = 0.9
-const PADDING_TOP = 24 // 增大顶部边距，提升绘图区域空间
-const PADDING_RIGHT = 20 // 增大右边距
-const PADDING_BOTTOM = 38 // 增大底部空间给时间轴和统计信息
-const PADDING_LEFT = 40 // 增大左边距为Y轴标签留出更多空间
+const PADDING_TOP = 14 // 适度的顶部边距
+const PADDING_RIGHT = 10 // 紧凑的右边距
+const PADDING_BOTTOM = 22 // 底部空间给时间轴标签
+const PADDING_LEFT = 34 // 左边距给Y轴标签
 
 const GRAPH_CONFIG = {
   maxPoints: MAX_POINTS,
@@ -181,15 +181,16 @@ export const EnhancedCanvasTrafficGraph = memo(
     const [currentFPS, setCurrentFPS] = useState(GRAPH_CONFIG.targetFPS)
 
     // 主题颜色配置
+    // compact模式下使用固定区分色：蓝色下载、绿色上传
     const colors = useMemo(
       () => ({
-        up: theme.palette.secondary.main,
-        down: theme.palette.primary.main,
+        up: compact ? '#36D399' : theme.palette.secondary.main,
+        down: compact ? '#2378F5' : theme.palette.primary.main,
         grid: theme.palette.divider,
         text: theme.palette.text.secondary,
         background: theme.palette.background.paper,
       }),
-      [theme],
+      [theme, compact],
     )
 
     // 更新显示数据（防抖处理）
@@ -277,6 +278,7 @@ export const EnhancedCanvasTrafficGraph = memo(
     }, [handleFocusStateChange])
 
     // Y轴坐标计算 - 线性映射
+    // compact模式使用极小padding，最大化曲线绘制区域
     const calculateY = useCallback(
       (
         value: number,
@@ -284,16 +286,17 @@ export const EnhancedCanvasTrafficGraph = memo(
         topValue: number,
         bottomValue: number,
       ): number => {
-        const padding = GRAPH_CONFIG.padding
-        const topY = padding.top + 10
-        const bottomY = height - padding.bottom - 5
+        const pt = compact ? 2 : GRAPH_CONFIG.padding.top
+        const pb = compact ? 2 : GRAPH_CONFIG.padding.bottom
+        const topY = pt + 2
+        const bottomY = height - pb - 1
 
         if (topValue === bottomValue) return bottomY
 
         const ratio = (value - bottomValue) / (topValue - bottomValue)
         return bottomY - ratio * (bottomY - topY)
       },
-      [],
+      [compact],
     )
 
     const computeYScale = useCallback(
@@ -453,8 +456,8 @@ export const EnhancedCanvasTrafficGraph = memo(
         const padding = GRAPH_CONFIG.padding
 
         // 强制显示三个刻度：底部、中间、顶部
-        const topY = padding.top + 10 // 避免与顶部时间范围按钮重叠
-        const bottomY = height - padding.bottom - 5 // 避免与底部时间轴重叠
+        const topY = padding.top + 6 // 避免与顶部时间范围按钮重叠
+        const bottomY = height - padding.bottom - 2 // 避免与底部时间轴重叠
         const middleY = (topY + bottomY) / 2
         const middleValue = (bottomValue + topValue) / 2
 
@@ -491,6 +494,9 @@ export const EnhancedCanvasTrafficGraph = memo(
         topValue: number,
         bottomValue: number,
       ) => {
+        // compact模式下完全跳过Y轴绘制，最大化曲线视觉权重
+        if (compact) return
+
         const padding = GRAPH_CONFIG.padding
         const ticks = getYAxisTicks(topValue, bottomValue, height)
 
@@ -517,7 +523,7 @@ export const EnhancedCanvasTrafficGraph = memo(
           // 绘制Y轴标签
           ctx.fillStyle = colors.text
           ctx.font =
-            "8px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif"
+            "9px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif"
           ctx.globalAlpha = 0.9
           ctx.textAlign = 'right'
           ctx.textBaseline = 'middle'
@@ -543,34 +549,34 @@ export const EnhancedCanvasTrafficGraph = memo(
 
         ctx.restore()
       },
-      [colors.grid, colors.text, colors.background, getYAxisTicks],
+      [colors.grid, colors.text, colors.background, getYAxisTicks, compact],
     )
 
     // 获取时间范围对应的最佳时间显示策略
     const getTimeDisplayStrategy = useCallback(
       (timeRangeMinutes: TimeRange) => {
         switch (timeRangeMinutes) {
-          case 1: // 1分钟：更稀疏的时间标签，显示 MM:SS
+          case 1: // 1分钟：稀疏的时间标签，显示 MM:SS
             return {
-              maxLabels: 4, // 减少到4个，让波形更舒展
+              maxLabels: 2, // 只显示首尾两个标签
               formatTime: formatTrafficMinuteSecond,
-              intervalSeconds: 15, // 每15秒一个标签
-              minPixelDistance: 60, // 增大间距，让标签更分散
+              intervalSeconds: 30, // 每30秒一个标签
+              minPixelDistance: 100, // 增大间距
             }
-          case 5: // 5分钟：中等密度，显示 HH:MM
+          case 5: // 5分钟：稀疏标签，显示 HH:MM
             return {
-              maxLabels: 4, // 4个标签，更大气宽松
+              maxLabels: 2, // 只显示首尾两个标签
               formatTime: formatTrafficHourMinute,
-              intervalSeconds: 60, // 约60秒间隔
-              minPixelDistance: 65, // 增大间距
+              intervalSeconds: 120, // 2分钟间隔
+              minPixelDistance: 100, // 增大间距
             }
           case 10: // 10分钟：标准密度，显示 HH:MM
           default:
             return {
-              maxLabels: 5, // 减少到5个，让波形线条舒展分散
+              maxLabels: 3, // 3个标签，更大气宽松
               formatTime: formatTrafficHourMinute,
-              intervalSeconds: 120, // 2分钟间隔
-              minPixelDistance: 70, // 增大间距，整体更大气
+              intervalSeconds: 180, // 3分钟间隔
+              minPixelDistance: 100, // 增大间距
             }
         }
       },
@@ -585,18 +591,21 @@ export const EnhancedCanvasTrafficGraph = memo(
         height: number,
         data: ITrafficDataPoint[],
       ) => {
+        // compact模式下完全跳过时间轴绘制，最大化曲线视觉权重
+        if (compact) return
+
         if (data.length === 0) return
 
         const padding = GRAPH_CONFIG.padding
         const effectiveWidth = width - padding.left - padding.right
-        const timeAxisY = height - padding.bottom + 14
+        const timeAxisY = height - padding.bottom + 12
 
         const strategy = getTimeDisplayStrategy(timeRange)
 
         ctx.save()
         ctx.fillStyle = colors.text
         ctx.font =
-          "10px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif"
+          "9px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif"
         ctx.globalAlpha = 0.7
 
         // 根据数据长度和时间范围智能选择显示间隔
@@ -673,12 +682,15 @@ export const EnhancedCanvasTrafficGraph = memo(
 
         ctx.restore()
       },
-      [colors.text, timeRange, getTimeDisplayStrategy],
+      [colors.text, timeRange, getTimeDisplayStrategy, compact],
     )
 
     // 绘制网格线
     const drawGrid = useCallback(
       (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+        // compact模式下不绘制网格线，减少视觉干扰
+        if (compact) return
+
         const padding = GRAPH_CONFIG.padding
         const effectiveWidth = width - padding.left - padding.right
         const effectiveHeight = height - padding.top - padding.bottom
@@ -686,10 +698,10 @@ export const EnhancedCanvasTrafficGraph = memo(
         ctx.save()
         ctx.strokeStyle = colors.grid
         ctx.lineWidth = GRAPH_CONFIG.lineWidth.grid
-        ctx.globalAlpha = 0.7
+        ctx.globalAlpha = 0.5
 
-        // 水平网格线
-        const horizontalLines = 3
+        // 水平网格线 - 只画1条中间线
+        const horizontalLines = 1
         for (let i = 1; i <= horizontalLines; i++) {
           const y = padding.top + (effectiveHeight / (horizontalLines + 1)) * i
           ctx.beginPath()
@@ -698,8 +710,8 @@ export const EnhancedCanvasTrafficGraph = memo(
           ctx.stroke()
         }
 
-        // 垂直网格线
-        const verticalLines = 4
+        // 垂直网格线 - 只画1条中间线
+        const verticalLines = 1
         for (let i = 1; i <= verticalLines; i++) {
           const x = padding.left + (effectiveWidth / (verticalLines + 1)) * i
           ctx.beginPath()
@@ -710,10 +722,11 @@ export const EnhancedCanvasTrafficGraph = memo(
 
         ctx.restore()
       },
-      [colors.grid],
+      [colors.grid, compact],
     )
 
     // 绘制流量线条
+    // compact模式：曲线视觉权重优先，增大线宽和渐变，使用极小padding
     const drawTrafficLine = useCallback(
       (
         ctx: CanvasRenderingContext2D,
@@ -728,13 +741,23 @@ export const EnhancedCanvasTrafficGraph = memo(
       ) => {
         if (data.length < 2) return
 
-        const padding = GRAPH_CONFIG.padding
-        const effectiveWidth = width - padding.left - padding.right
+        // compact模式使用极小padding，最大化曲线绘制区域
+        const padLeft = compact ? 2 : GRAPH_CONFIG.padding.left
+        const padRight = compact ? 2 : GRAPH_CONFIG.padding.right
+        const padTop = compact ? 2 : GRAPH_CONFIG.padding.top
+        const padBottom = compact ? 2 : GRAPH_CONFIG.padding.bottom
+        const effectiveWidth = width - padLeft - padRight
         const lastIndex = data.length - 1
         const getX = (index: number) =>
-          padding.left + (index / lastIndex) * effectiveWidth
+          padLeft + (index / lastIndex) * effectiveWidth
+
+        // compact模式下Y坐标直接用calculateY（已处理compact padding）
         const getY = (index: number) =>
           calculateY(data[index][valueKey], height, topValue, bottomValue)
+
+        // compact模式下增大线宽和渐变透明度，提升曲线视觉权重
+        const lineWidth = compact ? 2 : GRAPH_CONFIG.lineWidth.up
+        const gradientAlpha = compact ? 0.25 : GRAPH_CONFIG.alpha.gradient
 
         ctx.save()
 
@@ -742,13 +765,13 @@ export const EnhancedCanvasTrafficGraph = memo(
         if (withGradient && chartStyle === 'bezier') {
           const gradient = ctx.createLinearGradient(
             0,
-            padding.top,
+            padTop,
             0,
-            height - padding.bottom,
+            height - padBottom,
           )
           gradient.addColorStop(
             0,
-            `${color}${Math.round(GRAPH_CONFIG.alpha.gradient * 255)
+            `${color}${Math.round(gradientAlpha * 255)
               .toString(16)
               .padStart(2, '0')}`,
           )
@@ -772,8 +795,8 @@ export const EnhancedCanvasTrafficGraph = memo(
             }
           }
 
-          ctx.lineTo(getX(lastIndex), height - padding.bottom)
-          ctx.lineTo(getX(0), height - padding.bottom)
+          ctx.lineTo(getX(lastIndex), height - padBottom)
+          ctx.lineTo(getX(0), height - padBottom)
           ctx.closePath()
           ctx.fillStyle = gradient
           ctx.fill()
@@ -782,7 +805,7 @@ export const EnhancedCanvasTrafficGraph = memo(
         // 绘制主线条
         ctx.beginPath()
         ctx.strokeStyle = color
-        ctx.lineWidth = GRAPH_CONFIG.lineWidth.up
+        ctx.lineWidth = lineWidth
         ctx.lineCap = 'round'
         ctx.lineJoin = 'round'
         ctx.globalAlpha = GRAPH_CONFIG.alpha.line
@@ -806,19 +829,21 @@ export const EnhancedCanvasTrafficGraph = memo(
 
         ctx.stroke()
 
-        // 绘制圆点采样节点（减少数量，让线条更干净舒展）
-        const pointInterval = Math.max(1, Math.floor(data.length / 12))
-        ctx.fillStyle = color
-        ctx.globalAlpha = GRAPH_CONFIG.alpha.line
-        for (let i = 0; i < data.length; i += pointInterval) {
-          ctx.beginPath()
-          ctx.arc(getX(i), getY(i), 1.2, 0, Math.PI * 2)
-          ctx.fill()
+        // 绘制圆点采样节点（compact模式下跳过，减少视觉干扰）
+        if (!compact) {
+          const pointInterval = Math.max(1, Math.floor(data.length / 12))
+          ctx.fillStyle = color
+          ctx.globalAlpha = GRAPH_CONFIG.alpha.line
+          for (let i = 0; i < data.length; i += pointInterval) {
+            ctx.beginPath()
+            ctx.arc(getX(i), getY(i), 1.2, 0, Math.PI * 2)
+            ctx.fill()
+          }
         }
 
         ctx.restore()
       },
-      [calculateY, chartStyle],
+      [calculateY, chartStyle, compact],
     )
 
     const syncCanvasSize = useCallback((canvas: HTMLCanvasElement) => {
@@ -940,10 +965,13 @@ export const EnhancedCanvasTrafficGraph = memo(
 
       const currentTooltip = tooltipDataRef.current
       if (currentTooltip.visible && currentTooltip.dataIndex >= 0) {
-        const padding = GRAPH_CONFIG.padding
-        const effectiveWidth = cssWidth - padding.left - padding.right
+        const padLeft = compact ? 2 : GRAPH_CONFIG.padding.left
+        const padRight = compact ? 2 : GRAPH_CONFIG.padding.right
+        const padTop = compact ? 2 : GRAPH_CONFIG.padding.top
+        const padBottom = compact ? 2 : GRAPH_CONFIG.padding.bottom
+        const effectiveWidth = cssWidth - padLeft - padRight
         const dataX =
-          padding.left +
+          padLeft +
           (currentTooltip.dataIndex / (displayData.length - 1)) * effectiveWidth
 
         ctx.save()
@@ -954,19 +982,19 @@ export const EnhancedCanvasTrafficGraph = memo(
 
         // 绘制垂直指示线
         ctx.beginPath()
-        ctx.moveTo(dataX, padding.top)
-        ctx.lineTo(dataX, cssHeight - padding.bottom)
+        ctx.moveTo(dataX, padTop)
+        ctx.lineTo(dataX, cssHeight - padBottom)
         ctx.stroke()
 
         // 绘制水平指示线（高亮Y轴位置）
         ctx.beginPath()
-        ctx.moveTo(padding.left, currentTooltip.highlightY)
-        ctx.lineTo(cssWidth - padding.right, currentTooltip.highlightY)
+        ctx.moveTo(padLeft, currentTooltip.highlightY)
+        ctx.lineTo(cssWidth - padRight, currentTooltip.highlightY)
         ctx.stroke()
 
         ctx.restore()
       }
-    }, [displayData, colors, syncCanvasSize, clearCanvas])
+    }, [displayData, colors, syncCanvasSize, clearCanvas, compact])
 
     const shouldSkipGraphDraw = useCallback(() => {
       if (!isDocumentVisibleRef.current) return true

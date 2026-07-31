@@ -1,6 +1,6 @@
 import { Box, Typography, alpha, SvgIcon } from '@mui/material'
 import {
-  NetworkPingOutlined,
+  SystemUpdateAltOutlined,
   SpeedOutlined,
   DataUsageOutlined,
   DescriptionOutlined,
@@ -19,7 +19,7 @@ import iconDark from '@/assets/image/icon_dark.svg?react'
  * 设计规格：
  * - 标题 "快捷工具" + "TOOLS"
  * - 5 个等距排布功能按钮（深色圆角矩形 + 白色图标 + 文字）
- * - 延迟测试、速度测试、流量统计、日志查询、规则编辑
+ * - 获取更新、速度测试、流量统计、日志查询、规则编辑
  */
 const QuickToolsCard = memo(() => {
   const { t } = useTranslation()
@@ -27,13 +27,14 @@ const QuickToolsCard = memo(() => {
 
   const tools = [
     {
-      icon: <NetworkPingOutlined sx={{ fontSize: 20 }} />,
-      label: '延迟测试',
-      subtitle: '测试节点延迟',
-      path: '/test',
+      icon: <SystemUpdateAltOutlined sx={{ fontSize: 20 }} />,
+      label: '获取更新',
+      subtitle: '获取最新版本',
+      path: '',
       color: '#2378F5',
       external: false,
-      disabled: true,
+      disabled: false,
+      noEffect: true,
     },
     {
       icon: <SpeedOutlined sx={{ fontSize: 20 }} />,
@@ -43,15 +44,17 @@ const QuickToolsCard = memo(() => {
       color: '#36D399',
       external: true,
       disabled: false,
+      noEffect: false,
     },
     {
       icon: <DataUsageOutlined sx={{ fontSize: 20 }} />,
       label: '流量统计',
       subtitle: '查看使用情况',
-      path: '/connection',
+      path: '/connections',
       color: '#F59E0B',
       external: false,
       disabled: false,
+      noEffect: false,
     },
     {
       icon: <DescriptionOutlined sx={{ fontSize: 20 }} />,
@@ -61,6 +64,7 @@ const QuickToolsCard = memo(() => {
       color: '#EF4444',
       external: false,
       disabled: false,
+      noEffect: false,
     },
     {
       icon: <RuleOutlined sx={{ fontSize: 20 }} />,
@@ -70,6 +74,7 @@ const QuickToolsCard = memo(() => {
       color: '#4F46E5',
       external: false,
       disabled: false,
+      noEffect: false,
     },
   ]
 
@@ -112,6 +117,7 @@ const QuickToolsCard = memo(() => {
           <Box
             key={tool.label}
             onClick={() => {
+              if (tool.noEffect) return
               if (tool.disabled) return
               if (tool.external) {
                 openWebUrl(tool.path)

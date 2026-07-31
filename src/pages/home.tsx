@@ -29,18 +29,19 @@ export const preloadHomePageCards = () => Promise.resolve()
  */
 const HomePage = () => {
   return (
-    <BasePage title="首页" full contentStyle={{ padding: 0 }}>
+    <BasePage title="首页" full noScroll contentStyle={{ padding: 0 }}>
       <Box
         sx={{
           width: '100%',
           height: '100%',
-          overflow: 'auto',
+          overflow: 'hidden',
           p: { xs: 1, sm: 1.5 },
           boxSizing: 'border-box',
           bgcolor: '#0B101C',
           display: 'flex',
           flexDirection: 'column',
         }}
+        onWheel={(e) => e.preventDefault()}
       >
         <Stack
           spacing={{ xs: 0.75, sm: 1 }}
@@ -48,8 +49,8 @@ const HomePage = () => {
             width: '100%',
             maxWidth: '100%',
             mx: 'auto',
-            minHeight: 'min-content',
             flex: 1,
+            overflow: 'hidden',
           }}
         >
           {/* 第一区域：Banner 横幅 */}

@@ -99,10 +99,11 @@ const TrafficCard = memo(() => {
         </Box>
       </Box>
 
-      {/* 流量图 */}
+      {/* 流量图 - 固定高度防止布局位移 */}
       <Box
         sx={{
           height: 45,
+          flexShrink: 0,
           borderRadius: 1.5,
           overflow: 'hidden',
           bgcolor: 'rgba(0, 0, 0, 0.2)',
@@ -112,46 +113,49 @@ const TrafficCard = memo(() => {
         <EnhancedCanvasTrafficGraph compact />
       </Box>
 
-      {/* 数据面板 */}
+      {/* 数据面板 - 固定宽度防止数值变动导致布局位移 */}
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
+          alignItems: 'center',
           pt: 1,
           borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+          height: 48,
+          flexShrink: 0,
         }}
       >
         {/* 下载速度 */}
-        <Box sx={{ textAlign: 'center', flex: 1 }}>
+        <Box sx={{ textAlign: 'center', flex: 1, minWidth: 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.3 }}>
-            <ArrowDownwardRounded sx={{ fontSize: 14, color: '#2378F5' }} />
-            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace' }}>
+            <ArrowDownwardRounded sx={{ fontSize: 14, color: '#2378F5', flexShrink: 0 }} />
+            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {down} {downUnit}/s
             </Typography>
           </Box>
-          <Typography sx={{ fontSize: 9, color: '#8A98B5' }}>下载速度</Typography>
+          <Typography sx={{ fontSize: 9, color: '#8A98B5', whiteSpace: 'nowrap' }}>下载速度</Typography>
         </Box>
 
         {/* 上传速度 */}
-        <Box sx={{ textAlign: 'center', flex: 1 }}>
+        <Box sx={{ textAlign: 'center', flex: 1, minWidth: 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.3 }}>
-            <ArrowUpwardRounded sx={{ fontSize: 14, color: '#36D399' }} />
-            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace' }}>
+            <ArrowUpwardRounded sx={{ fontSize: 14, color: '#36D399', flexShrink: 0 }} />
+            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {up} {upUnit}/s
             </Typography>
           </Box>
-          <Typography sx={{ fontSize: 9, color: '#8A98B5' }}>上传速度</Typography>
+          <Typography sx={{ fontSize: 9, color: '#8A98B5', whiteSpace: 'nowrap' }}>上传速度</Typography>
         </Box>
 
         {/* 总流量 */}
-        <Box sx={{ textAlign: 'center', flex: 1 }}>
+        <Box sx={{ textAlign: 'center', flex: 1, minWidth: 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.3 }}>
-            <DonutLargeOutlined sx={{ fontSize: 14, color: '#2378F5' }} />
-            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace' }}>
+            <DonutLargeOutlined sx={{ fontSize: 14, color: '#2378F5', flexShrink: 0 }} />
+            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {totalDown} {totalDownUnit}
             </Typography>
           </Box>
-          <Typography sx={{ fontSize: 9, color: '#8A98B5' }}>总流量</Typography>
+          <Typography sx={{ fontSize: 9, color: '#8A98B5', whiteSpace: 'nowrap' }}>总流量</Typography>
         </Box>
       </Box>
     </Box>

@@ -84,26 +84,11 @@ const SubscriptionInfoCard = memo(() => {
         overflow: 'hidden',
       }}
     >
-      {/* 全局光效动画样式 */}
+      {/* 闪烁蓝点动画样式 */}
       <style>{`
-        @keyframes progressLight {
-          0% { left: -30%; }
-          100% { left: 130%; }
-        }
-        .light-bar-progress .MuiLinearProgress-bar {
-          position: relative;
-          overflow: hidden;
-        }
-        .light-bar-progress .MuiLinearProgress-bar::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -30%;
-          width: 30%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
-          animation: progressLight 2.5s ease-in-out infinite;
-          pointer-events: none;
+        @keyframes pulseBlueDot {
+          0%, 100% { opacity: 1; box-shadow: 0 0 4px 2px rgba(33, 118, 244, 0.6); }
+          50% { opacity: 0.4; box-shadow: 0 0 8px 4px rgba(33, 118, 244, 0.9); }
         }
       `}</style>
 
@@ -189,11 +174,10 @@ const SubscriptionInfoCard = memo(() => {
         <Typography sx={{ fontSize: 12, color: '#9CA3AF', flexShrink: 0 }}>
           使用进度
         </Typography>
-        <Box sx={{ flex: 1 }}>
+        <Box sx={{ flex: 1, position: 'relative' }}>
           <LinearProgress
             variant="determinate"
             value={usagePercent}
-            className="light-bar-progress"
             sx={{
               height: 7,
               borderRadius: 3.5,
@@ -202,6 +186,21 @@ const SubscriptionInfoCard = memo(() => {
                 borderRadius: 3.5,
                 background: 'linear-gradient(90deg, #93C5FD, #2176F4)',
               },
+            }}
+          />
+          {/* 进度条当前位置的闪烁蓝点 */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: `calc(${usagePercent}% - 4px)`,
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              bgcolor: '#2176F4',
+              transform: 'translateY(-50%)',
+              animation: 'pulseBlueDot 1.5s ease-in-out infinite',
+              pointerEvents: 'none',
             }}
           />
         </Box>

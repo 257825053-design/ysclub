@@ -32,6 +32,12 @@ impl SilentUpdater {
     pub fn is_update_ready(&self) -> bool {
         self.update_ready.load(Ordering::Acquire)
     }
+
+    /// 公开方法：删除已缓存的更新文件，防止启动时弹出安装对话框。
+    /// 在 init_silent_updater 中调用，因为更新功能已彻底禁用。
+    pub fn cleanup_cache(&self) {
+        Self::delete_cache();
+    }
 }
 
 // ─── Disk Cache ───────────────────────────────────────────────────────────────
