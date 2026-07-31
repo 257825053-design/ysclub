@@ -9,9 +9,9 @@ use clash_verge_logging::{Type, logging_error};
 #[cfg(target_os = "macos")]
 use clash_verge_logging::logging;
 
-const DARK_BACKGROUND_COLOR: Color = Color(46, 48, 61, 255); // #2E303D
+const DARK_BACKGROUND_COLOR: Color = Color(11, 16, 28, 255); // #0B101C
 const LIGHT_BACKGROUND_COLOR: Color = Color(245, 245, 245, 255); // #F5F5F5
-const DARK_BACKGROUND_HEX: &str = "#2E303D";
+const DARK_BACKGROUND_HEX: &str = "#0B101C";
 const LIGHT_BACKGROUND_HEX: &str = "#F5F5F5";
 
 // 定义默认窗口尺寸常量
@@ -44,6 +44,77 @@ fn restore_default_size_if_needed(window: &WebviewWindow) {
         window.set_size(tauri::LogicalSize::new(DEFAULT_WIDTH, DEFAULT_HEIGHT))
     );
     logging_error!(Type::Window, window.center());
+}
+
+/// 设置 Windows DWM 窗口边框颜色，防止窗口失焦时边框变灰
+///
+/// Windows 11 在窗口失焦时会将 DWM 边框从系统强调色（蓝色）变为灰色。
+/// 通过 `DwmGetColorizationColor` 读取当前系统强调色，再用 `DwmSetWindowAttribute`
+/// 将边框和标题栏颜色固定为该色，使窗口在激活和失焦状态下保持一致的蓝色。
+#[cfg(target_os = "windows")]
+pub fn apply_dwm_window_style(window: &WebviewWindow) {
+    use windows_sys::Win32::Graphics::Dwm::{DwmGetColorizationColor, DwmSetWindowAttribute};
+    use tauri::raw_window_handle::{HasWindowHandle, RawWindowHandle};
+
+    // DWM 窗口属性常量
+    const DWMWA_USE_IMMERSIVE_DARK_MODE: u32 = 20;
+    const DWMWA_BORDER_COLOR: u32 = 34;
+    const DWMWA_CAPTION_COLOR: u32 = 35;
+
+    // 读取系统强调色（ARGB 格式 0xAARRGGBB）
+    let mut colorization_color: u32 = 0;
+    let mut opaque_blend: i32 = 0;
+    let accent_ok = unsafe {
+        DwmGetColorizationColor(&mut colorization_color, &mut opaque_blend) == 0 // S_OK = 0
+    };
+
+    // 转换 ARGB → COLORREF (0x00BBGGRR)
+    let border_color: u32 = if accent_ok {
+        let r = (colorization_color >> 16) & 0xFF;
+        let g = (colorization_color >> 8) & 0xFF;
+        let b = colorization_color & 0xFF;
+        (b << 16) | (g << 8) | r
+    } else {
+        // 后备色：Windows 11 默认强调蓝 #0078D4 → COLORREF 0x00D47800
+        0x00D47800
+    };
+
+    let handle = match window.window_handle() {
+        Ok(handle) => handle,
+        Err(_) => return,
+    };
+
+    let hwnd: isize = match handle.as_raw() {
+        RawWindowHandle::Win32(h) => h.hwnd.as_ptr() as isize,
+        _ => return,
+    };
+
+    unsafe {
+        // 启用暗色模式窗口边框
+        let dark_mode: i32 = 1;
+        let _ = DwmSetWindowAttribute(
+            hwnd,
+            DWMWA_USE_IMMERSIVE_DARK_MODE,
+            &dark_mode as *const _ as *const core::ffi::c_void,
+            std::mem::size_of::<i32>() as u32,
+        );
+
+        // 设置边框颜色为系统强调色，防止失焦时变灰
+        let _ = DwmSetWindowAttribute(
+            hwnd,
+            DWMWA_BORDER_COLOR,
+            &border_color as *const _ as *const core::ffi::c_void,
+            std::mem::size_of::<u32>() as u32,
+        );
+
+        // 设置标题栏颜色为系统强调色
+        let _ = DwmSetWindowAttribute(
+            hwnd,
+            DWMWA_CAPTION_COLOR,
+            &border_color as *const _ as *const core::ffi::c_void,
+            std::mem::size_of::<u32>() as u32,
+        );
+    }
 }
 
 /// 构建新的 WebView 窗口
@@ -111,6 +182,9 @@ pub async fn build_new_window() -> Result<WebviewWindow, String> {
     match builder.build() {
         Ok(window) => {
             logging_error!(Type::Window, window.set_background_color(Some(background_color)));
+            // Windows: 设置 DWM 边框颜色，防止窗口失焦时边框变灰
+            #[cfg(target_os = "windows")]
+            apply_dwm_window_style(&window);
             restore_default_size_if_needed(&window);
             // 全新窗口的页面即为最新状态，丢弃旧窗口遗留的待重载标记，避免多余 reload
             #[cfg(target_os = "macos")]

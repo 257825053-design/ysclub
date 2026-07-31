@@ -41,6 +41,8 @@ const TrafficCard = memo(() => {
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
+        minWidth: 0,
+        overflow: 'hidden',
       }}
     >
       {/* 标题 + 右上角下载/上传图例 */}
@@ -126,10 +128,10 @@ const TrafficCard = memo(() => {
         }}
       >
         {/* 下载速度 */}
-        <Box sx={{ textAlign: 'center', flex: 1, minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.3 }}>
+        <Box sx={{ textAlign: 'center', flex: 1, minWidth: 0, overflow: 'hidden' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.3, minWidth: 0, overflow: 'hidden' }}>
             <ArrowDownwardRounded sx={{ fontSize: 14, color: '#2378F5', flexShrink: 0 }} />
-            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
               {down} {downUnit}/s
             </Typography>
           </Box>
@@ -137,10 +139,10 @@ const TrafficCard = memo(() => {
         </Box>
 
         {/* 上传速度 */}
-        <Box sx={{ textAlign: 'center', flex: 1, minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.3 }}>
+        <Box sx={{ textAlign: 'center', flex: 1, minWidth: 0, overflow: 'hidden' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.3, minWidth: 0, overflow: 'hidden' }}>
             <ArrowUpwardRounded sx={{ fontSize: 14, color: '#36D399', flexShrink: 0 }} />
-            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
               {up} {upUnit}/s
             </Typography>
           </Box>
@@ -148,10 +150,10 @@ const TrafficCard = memo(() => {
         </Box>
 
         {/* 总流量 */}
-        <Box sx={{ textAlign: 'center', flex: 1, minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.3 }}>
+        <Box sx={{ textAlign: 'center', flex: 1, minWidth: 0, overflow: 'hidden' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mb: 0.3, minWidth: 0, overflow: 'hidden' }}>
             <DonutLargeOutlined sx={{ fontSize: 14, color: '#2378F5', flexShrink: 0 }} />
-            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
               {totalDown} {totalDownUnit}
             </Typography>
           </Box>

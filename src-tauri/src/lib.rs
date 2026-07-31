@@ -363,6 +363,14 @@ pub fn run() {
         }
 
         pub fn handle_window_focus(focused: bool) {
+            // Windows: 窗口焦点变化时重新应用 DWM 边框颜色，防止失焦变灰
+            #[cfg(target_os = "windows")]
+            {
+                if let Some(window) = WindowManager::get_main_window() {
+                    crate::utils::resolve::window::apply_dwm_window_style(&window);
+                }
+            }
+
             AsyncHandler::spawn(move || async move {
                 let is_enable_global_hotkey = Config::verge().await.data_arc().enable_global_hotkey.unwrap_or(true);
 

@@ -62,10 +62,12 @@ const HomePage = () => {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+              gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) minmax(0, 1fr)' },
               gap: { xs: 0.75, sm: 1 },
               flexShrink: 0,
               width: '100%',
+              overflow: 'hidden',
+              '& > *': { minWidth: 0, overflow: 'hidden' },
             }}
           >
             <SubscriptionInfoCard />
@@ -76,10 +78,12 @@ const HomePage = () => {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
+              gridTemplateColumns: { xs: '1fr', sm: 'minmax(0, 1fr) minmax(0, 1fr)', md: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)' },
               gap: { xs: 0.75, sm: 1 },
               flexShrink: 0,
               width: '100%',
+              overflow: 'hidden',
+              '& > *': { minWidth: 0, overflow: 'hidden' },
             }}
           >
             <NetworkSettingsCard />

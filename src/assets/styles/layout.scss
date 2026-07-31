@@ -26,7 +26,7 @@
       -ms-user-select: none;
       overflow: hidden;
       border-right: 1px solid var(--divider-color);
-      background: rgba(15, 22, 38, 0.95);
+      background: rgb(15, 22, 38);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
 
@@ -221,7 +221,7 @@
       padding: 0 10px;
       box-sizing: border-box;
       height: 36px;
-      background: rgba(15, 22, 38, 0.95);
+      background: rgb(15, 22, 38);
       border-bottom: 1px solid var(--divider-color);
       app-region: drag;
       -webkit-app-region: drag;
@@ -271,7 +271,7 @@
       padding: 0 10px;
       box-sizing: border-box;
       height: 36px;
-      background: rgba(15, 22, 38, 0.95);
+      background: rgb(15, 22, 38);
       border-bottom: 1px solid var(--divider-color);
       app-region: drag;
       -webkit-app-region: drag;
