@@ -1,4 +1,4 @@
-import { Box, Switch, Typography, alpha } from '@mui/material'
+import { Box, Switch, Typography, alpha, SvgIcon } from '@mui/material'
 import { CheckCircleOutlineOutlined, LaptopOutlined, LanOutlined, SettingsOutlined } from '@mui/icons-material'
 import { memo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -7,6 +7,7 @@ import { useLockFn } from 'ahooks'
 import { useSystemData, useAppRefreshers } from '@/providers/app-data-context'
 import { useVerge } from '@/hooks/use-verge'
 import { showNotice } from '@/services/notice-service'
+import iconDark from '@/assets/image/icon_dark.svg?react'
 
 /**
  * NetworkSettingsCard - 网络设置卡片
@@ -65,13 +66,20 @@ const NetworkSettingsCard = memo(() => {
       }}
     >
       {/* 标题 */}
-      <Box>
-        <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
-          网络设置
-        </Typography>
-        <Typography sx={{ fontSize: 9, color: '#8A98B5', letterSpacing: '1px', fontWeight: 500 }}>
-          NETWORK
-        </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+        <SvgIcon
+          component={iconDark}
+          sx={{ width: 18, height: 18, flexShrink: 0, opacity: 0.9 }}
+          inheritViewBox
+        />
+        <Box>
+          <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
+            网络设置
+          </Typography>
+          <Typography sx={{ fontSize: 9, color: '#8A98B5', letterSpacing: '1px', fontWeight: 500 }}>
+            NETWORK
+          </Typography>
+        </Box>
       </Box>
 
       {/* 两个模式按钮 - 单选切换 */}

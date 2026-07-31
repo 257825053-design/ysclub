@@ -217,7 +217,7 @@ if ($buildExitCode -ne 0) {
 # ============ Step 10: Find installer ============
 Write-Step "Step 10: Locate the installer"
 $installerPaths = @(
-    "src-tauri\target\release\bundle\nsis\YSCLUB_2.5.3_x64-setup.exe",
+    "src-tauri\target\release\bundle\nsis\YSCLUB_1.0.0_x64-setup.exe",
     "src-tauri\target\release\bundle\nsis\YSCLUB_*.exe"
 )
 

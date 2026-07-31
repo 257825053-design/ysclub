@@ -34,17 +34,25 @@ const HomePage = () => {
         sx={{
           width: '100%',
           height: '100%',
-          overflow: 'hidden',
-          p: 1.5,
+          overflow: 'auto',
+          p: { xs: 1, sm: 1.5 },
           boxSizing: 'border-box',
           bgcolor: '#0B101C',
           display: 'flex',
           flexDirection: 'column',
         }}
       >
-        <Stack spacing={1} sx={{ maxWidth: 1100, mx: 'auto', height: '100%', justifyContent: 'space-between' }}>
+        <Stack
+          spacing={{ xs: 0.75, sm: 1 }}
+          sx={{
+            width: '100%',
+            maxWidth: 1100,
+            mx: 'auto',
+            minHeight: 'min-content',
+          }}
+        >
           {/* 第一区域：Banner 横幅 */}
-          <Box sx={{ flexShrink: 0 }}>
+          <Box sx={{ flexShrink: 0, width: '100%' }}>
             <HeroBanner backgroundImage="url('/images/hero-banner.png')" />
           </Box>
 
@@ -53,8 +61,9 @@ const HomePage = () => {
             sx={{
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-              gap: 1,
+              gap: { xs: 0.75, sm: 1 },
               flexShrink: 0,
+              width: '100%',
             }}
           >
             <SubscriptionInfoCard />
@@ -66,8 +75,9 @@ const HomePage = () => {
             sx={{
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
-              gap: 1,
+              gap: { xs: 0.75, sm: 1 },
               flexShrink: 0,
+              width: '100%',
             }}
           >
             <NetworkSettingsCard />
@@ -76,7 +86,7 @@ const HomePage = () => {
           </Box>
 
           {/* 第四区域：快捷工具 - 通栏整宽卡片 */}
-          <Box sx={{ flexShrink: 0 }}>
+          <Box sx={{ flexShrink: 0, width: '100%' }}>
             <QuickToolsCard />
           </Box>
         </Stack>

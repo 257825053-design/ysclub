@@ -112,6 +112,17 @@
   }
 }
 
+/* 自定义标题栏模式：隐藏右侧 the-bar，由 the_titlebar 替代 */
+.layout:has(.the_titlebar) {
+  .layout-content__right .the-bar {
+    display: none !important;
+  }
+
+  .layout-content__right .the-content {
+    top: 0 !important;
+  }
+}
+
 .window-resize-handles {
   --resize-edge-size: 6px;
   --resize-corner-size: 12px;
@@ -206,29 +217,46 @@
       width: 100%;
       display: flex;
       justify-content: flex-end;
-      padding: 10px;
+      align-items: center;
+      padding: 0 10px;
       box-sizing: border-box;
       height: 36px;
+      background: rgba(15, 22, 38, 0.95);
       border-bottom: 1px solid var(--divider-color);
+      app-region: drag;
+      -webkit-app-region: drag;
 
       &-drag-region {
         align-self: stretch;
         flex: 1 1 auto;
       }
+
+      /* 窗口控制按钮样式 */
+      .MuiIconButton-root {
+        app-region: no-drag;
+        -webkit-app-region: no-drag;
+        width: 36px;
+        height: 28px;
+        border-radius: 4px;
+        color: #8A98B5;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.08);
+          color: #FFFFFF;
+        }
+      }
     }
 
     .layout-content__left .the-logo {
-      flex: 1 0 80px;
-      margin-top: 10px;
+      flex: 0 0 48px;
+      margin-top: 8px;
       margin-left: 10px;
-      padding-top: 5px;
-      padding-left: 10px;
-      padding-right: 20px;
-      padding-bottom: 16px;
+      padding: 0 10px;
+      justify-content: center;
     }
 
     .layout-content__right .the-content {
-      top: 5px;
+      top: 0;
     }
   }
 }
@@ -239,15 +267,24 @@
       width: 100%;
       display: flex;
       justify-content: flex-start;
-      padding: 10px;
+      align-items: center;
+      padding: 0 10px;
       box-sizing: border-box;
       height: 36px;
+      background: rgba(15, 22, 38, 0.95);
       border-bottom: 1px solid var(--divider-color);
+      app-region: drag;
+      -webkit-app-region: drag;
 
       &-drag-region {
         align-self: stretch;
         flex: 1 1 auto;
         order: 1;
+      }
+
+      .MuiIconButton-root {
+        app-region: no-drag;
+        -webkit-app-region: no-drag;
       }
     }
 
@@ -256,7 +293,7 @@
     }
 
     .layout-content__right .the-content {
-      top: 5px;
+      top: 0;
     }
 
     .layout-content__left .the-newbtn {

@@ -3,24 +3,22 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+
   > header {
-    flex: 0 0 58px;
+    flex: 0 0 48px;
     width: 100%;
-    // max-width: 850px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 16px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid var(--divider-color);
   }
 
   .base-container {
-    height: 100%;
+    flex: 1;
+    min-height: 0;
     overflow: hidden;
-    // border-radius: 10px;
-    // border-top-left-radius: var(--border-radius);
 
     > section {
       position: relative;
@@ -31,6 +29,7 @@
       padding: 10px 0;
       box-sizing: border-box;
       scrollbar-gutter: stable;
+
       .base-content {
         width: calc(100% - 10px * 2);
         margin: 0 auto;
@@ -40,7 +39,8 @@
     &.no-padding {
       > section {
         padding: 0;
-        overflow: visible;
+        overflow: auto;
+
         .base-content {
           width: 100%;
         }

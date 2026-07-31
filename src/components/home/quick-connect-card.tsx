@@ -1,12 +1,15 @@
-import { Box, Button, MenuItem, Select, Typography, alpha } from '@mui/material'
+import { Box, Button, MenuItem, Select, Typography, alpha, SvgIcon } from '@mui/material'
 import { BoltOutlined, RefreshOutlined, CheckCircleOutlined } from '@mui/icons-material'
-import { memo } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLockFn } from 'ahooks'
 
 import { useProxiesData, useCoreDataStatus, useSystemData, useAppRefreshers } from '@/providers/app-data-context'
 import { useVerge } from '@/hooks/use-verge'
 import { showNotice } from '@/services/notice-service'
+import delayManager from '@/services/delay'
+import { DEFAULT_DELAY_TIMEOUT } from '@/utils/delay'
+import iconDark from '@/assets/image/icon_dark.svg?react'
 
 /**
  * QuickConnectCard - 快速连接卡片
@@ -29,6 +32,8 @@ const QuickConnectCard = memo(() => {
   const { verge, patchVerge } = useVerge()
   const { refreshSysproxy, refreshAll } = useAppRefreshers()
 
+  const [isTesting, setIsTesting] = useState(false)
+
   const isConnected = sysproxy?.enable || runningMode === 'Service'
 
   const groups = proxyView?.groups?.filter(
@@ -36,6 +41,20 @@ const QuickConnectCard = memo(() => {
   ) || []
   const currentGroup = groups[0]
   const currentProxy = currentGroup?.now || '自动选择'
+
+  // 获取当前组的所有成员节点名称列表
+  const memberNodes = useMemo(() => {
+    if (!currentGroup?.members) return []
+    return currentGroup.members
+      .filter((m) => m.kind === 'node')
+      .map((m) => m.name)
+  }, [currentGroup])
+
+  // 获取所有可用节点名称列表（从 records 中）
+  const allNodes = useMemo(() => {
+    if (!proxyView?.records) return []
+    return Object.values(proxyView.records).map((node) => node.name)
+  }, [proxyView])
 
   // 连接/断开切换 - 与电源按钮联动
   const handleToggleConnect = useLockFn(async () => {
@@ -46,6 +65,56 @@ const QuickConnectCard = memo(() => {
       await refreshAll()
     } catch (error) {
       showNotice.error(error)
+    }
+  })
+
+  // 刷新按钮：对当前代理组执行延迟测试
+  const handleRefreshDelay = useLockFn(async () => {
+    if (!currentGroup || isTesting) return
+    const groupName = currentGroup.name
+
+    // 获取该组所有可交互成员
+    const members = currentGroup.members
+      .map((memberRef) => {
+        if (memberRef.kind === 'node') {
+          const node = proxyView?.records[memberRef.recordId]
+          if (node) {
+            return { kind: 'node' as const, ref: memberRef, node }
+          }
+        }
+        return null
+      })
+      .filter(Boolean) as Array<{
+        kind: 'node'
+        ref: { kind: 'node'; name: string; recordId: string }
+        node: any
+      }>
+
+    if (members.length === 0) {
+      showNotice.error('当前代理组没有可用节点')
+      return
+    }
+
+    setIsTesting(true)
+    try {
+      // 设置测试 URL
+      const defaultLatencyUrl =
+        verge?.default_latency_test?.trim() ||
+        'http://cp.cloudflare.com/generate_204'
+      delayManager.setUrl(groupName, currentGroup.testUrl || defaultLatencyUrl)
+
+      // 执行批量延迟测试
+      await delayManager.checkListDelay(
+        members,
+        groupName,
+        DEFAULT_DELAY_TIMEOUT,
+      )
+
+      showNotice.success('延迟测试完成')
+    } catch (error) {
+      showNotice.error(error)
+    } finally {
+      setIsTesting(false)
     }
   })
 
@@ -63,18 +132,25 @@ const QuickConnectCard = memo(() => {
       }}
     >
       {/* 标题 */}
-      <Box>
-        <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
-          快速连接
-        </Typography>
-        <Typography sx={{ fontSize: 10, color: '#8A98B5', letterSpacing: '1px', fontWeight: 500 }}>
-          QUICK CONNECT
-        </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+        <SvgIcon
+          component={iconDark}
+          sx={{ width: 18, height: 18, flexShrink: 0, opacity: 0.9 }}
+          inheritViewBox
+        />
+        <Box>
+          <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
+            快速连接
+          </Typography>
+          <Typography sx={{ fontSize: 10, color: '#8A98B5', letterSpacing: '1px', fontWeight: 500 }}>
+            QUICK CONNECT
+          </Typography>
+        </Box>
       </Box>
 
       {/* 下拉选择器 */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-        {/* 自动选择 */}
+        {/* 自动选择 - 显示当前组的所有成员节点 */}
         <Box>
           <Typography sx={{ fontSize: 11, color: '#8A98B5', mb: 0.5 }}>
             自动选择 URLTest
@@ -99,9 +175,18 @@ const QuickConnectCard = memo(() => {
                 '& .MuiSelect-select': { py: 0.5 },
               }}
             >
-              <MenuItem value={currentProxy}>{currentProxy}</MenuItem>
+              {memberNodes.length > 0 ? (
+                memberNodes.map((name) => (
+                  <MenuItem key={name} value={name}>
+                    {name}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem value={currentProxy}>{currentProxy}</MenuItem>
+              )}
             </Select>
             <Box
+              onClick={handleRefreshDelay}
               sx={{
                 width: 36,
                 height: 36,
@@ -109,14 +194,30 @@ const QuickConnectCard = memo(() => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                bgcolor: 'rgba(255, 255, 255, 0.03)',
+                bgcolor: isTesting
+                  ? alpha('#2378F5', 0.15)
+                  : 'rgba(255, 255, 255, 0.03)',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
-                cursor: 'pointer',
-                color: '#8A98B5',
-                '&:hover': { color: '#2378F5', borderColor: 'rgba(35, 120, 245, 0.3)' },
+                cursor: isTesting ? 'default' : 'pointer',
+                color: isTesting ? '#2378F5' : '#8A98B5',
+                transition: 'all 0.2s ease',
+                '&:hover': isTesting
+                  ? {}
+                  : { color: '#2378F5', borderColor: 'rgba(35, 120, 245, 0.3)' },
               }}
             >
-              <RefreshOutlined sx={{ fontSize: 18 }} />
+              <RefreshOutlined
+                sx={{
+                  fontSize: 18,
+                  animation: isTesting ? 'spin 1s linear infinite' : 'none',
+                }}
+              />
+              <style>{`
+                @keyframes spin {
+                  from { transform: rotate(0deg); }
+                  to { transform: rotate(360deg); }
+                }
+              `}</style>
             </Box>
           </Box>
         </Box>
@@ -153,7 +254,7 @@ const QuickConnectCard = memo(() => {
           </Select>
         </Box>
 
-        {/* 节点 */}
+        {/* 节点 - 显示所有可用节点 */}
         <Box>
           <Typography sx={{ fontSize: 11, color: '#8A98B5', mb: 0.5 }}>
             节点
@@ -177,7 +278,15 @@ const QuickConnectCard = memo(() => {
               '& .MuiSelect-select': { py: 0.5 },
             }}
           >
-            <MenuItem value={currentProxy}>{currentProxy}</MenuItem>
+            {allNodes.length > 0 ? (
+              allNodes.map((name) => (
+                <MenuItem key={name} value={name}>
+                  {name}
+                </MenuItem>
+              ))
+            ) : (
+              <MenuItem value={currentProxy}>{currentProxy}</MenuItem>
+            )}
           </Select>
         </Box>
       </Box>

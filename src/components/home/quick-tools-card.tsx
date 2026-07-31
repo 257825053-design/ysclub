@@ -1,4 +1,4 @@
-import { Box, Typography, alpha } from '@mui/material'
+import { Box, Typography, alpha, SvgIcon } from '@mui/material'
 import {
   NetworkPingOutlined,
   SpeedOutlined,
@@ -9,6 +9,9 @@ import {
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
+
+import { openWebUrl } from '@/services/cmds'
+import iconDark from '@/assets/image/icon_dark.svg?react'
 
 /**
  * QuickToolsCard - 快捷工具卡片
@@ -29,20 +32,23 @@ const QuickToolsCard = memo(() => {
       subtitle: '测试节点延迟',
       path: '/test',
       color: '#2378F5',
+      external: false,
     },
     {
       icon: <SpeedOutlined sx={{ fontSize: 20 }} />,
       label: '速度测试',
       subtitle: '测试当前速度',
-      path: '/test',
+      path: 'https://test.ustc.edu.cn/',
       color: '#36D399',
+      external: true,
     },
     {
       icon: <DataUsageOutlined sx={{ fontSize: 20 }} />,
       label: '流量统计',
       subtitle: '查看使用情况',
-      path: '/connections',
+      path: '/logs',
       color: '#F59E0B',
+      external: false,
     },
     {
       icon: <DescriptionOutlined sx={{ fontSize: 20 }} />,
@@ -50,6 +56,7 @@ const QuickToolsCard = memo(() => {
       subtitle: '分析连接日志',
       path: '/logs',
       color: '#EF4444',
+      external: false,
     },
     {
       icon: <RuleOutlined sx={{ fontSize: 20 }} />,
@@ -57,6 +64,7 @@ const QuickToolsCard = memo(() => {
       subtitle: '自定义规则',
       path: '/rules',
       color: '#4F46E5',
+      external: false,
     },
   ]
 
@@ -71,13 +79,20 @@ const QuickToolsCard = memo(() => {
       }}
     >
       {/* 标题 */}
-      <Box sx={{ mb: 1 }}>
-        <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
-          快捷工具
-        </Typography>
-        <Typography sx={{ fontSize: 9, color: '#8A98B5', letterSpacing: '1px', fontWeight: 500 }}>
-          TOOLS
-        </Typography>
+      <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.75 }}>
+        <SvgIcon
+          component={iconDark}
+          sx={{ width: 18, height: 18, flexShrink: 0, opacity: 0.9 }}
+          inheritViewBox
+        />
+        <Box>
+          <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
+            快捷工具
+          </Typography>
+          <Typography sx={{ fontSize: 9, color: '#8A98B5', letterSpacing: '1px', fontWeight: 500 }}>
+            TOOLS
+          </Typography>
+        </Box>
       </Box>
 
       {/* 工具按钮网格 */}
@@ -91,7 +106,13 @@ const QuickToolsCard = memo(() => {
         {tools.map((tool) => (
           <Box
             key={tool.label}
-            onClick={() => navigate(tool.path)}
+            onClick={() => {
+              if (tool.external) {
+                openWebUrl(tool.path)
+              } else {
+                navigate(tool.path)
+              }
+            }}
             sx={{
               display: 'flex',
               flexDirection: 'column',

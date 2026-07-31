@@ -1,4 +1,4 @@
-import { Box, Typography, alpha } from '@mui/material'
+import { Box, Typography, alpha, SvgIcon } from '@mui/material'
 import { LanguageOutlined, CallSplitOutlined, DiamondOutlined } from '@mui/icons-material'
 import { memo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -10,6 +10,7 @@ import { useVerge } from '@/hooks/use-verge'
 import { patchClashMode } from '@/services/cmds'
 import { showNotice } from '@/services/notice-service'
 import { setCacheData } from '@/services/query-client'
+import iconDark from '@/assets/image/icon_dark.svg?react'
 
 /**
  * ProxyModeCard - 代理模式卡片
@@ -72,13 +73,20 @@ const ProxyModeCard = memo(() => {
       }}
     >
       {/* 标题 */}
-      <Box>
-        <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
-          代理模式
-        </Typography>
-        <Typography sx={{ fontSize: 9, color: '#8A98B5', letterSpacing: '1px', fontWeight: 500 }}>
-          MODE
-        </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+        <SvgIcon
+          component={iconDark}
+          sx={{ width: 18, height: 18, flexShrink: 0, opacity: 0.9 }}
+          inheritViewBox
+        />
+        <Box>
+          <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
+            代理模式
+          </Typography>
+          <Typography sx={{ fontSize: 9, color: '#8A98B5', letterSpacing: '1px', fontWeight: 500 }}>
+            MODE
+          </Typography>
+        </Box>
       </Box>
 
       {/* 三个模式按钮 */}

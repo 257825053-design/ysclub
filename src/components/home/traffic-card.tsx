@@ -1,4 +1,4 @@
-import { Box, Typography, alpha } from '@mui/material'
+import { Box, Typography, alpha, SvgIcon } from '@mui/material'
 import { ArrowDownwardRounded, ArrowUpwardRounded, DonutLargeOutlined } from '@mui/icons-material'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -7,6 +7,7 @@ import { EnhancedCanvasTrafficGraph } from '@/components/home/enhanced-canvas-tr
 import { useTrafficData } from '@/hooks/use-traffic-data'
 import { useVisibility } from '@/hooks/use-visibility'
 import parseTraffic from '@/utils/parse-traffic'
+import iconDark from '@/assets/image/icon_dark.svg?react'
 
 /**
  * TrafficCard - 实时流量卡片
@@ -44,13 +45,20 @@ const TrafficCard = memo(() => {
     >
       {/* 标题 + 右上角下载/上传图例 */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box>
-          <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
-            实时流量
-          </Typography>
-          <Typography sx={{ fontSize: 9, color: '#8A98B5', letterSpacing: '1px', fontWeight: 500 }}>
-            TRAFFIC
-          </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+          <SvgIcon
+            component={iconDark}
+            sx={{ width: 18, height: 18, flexShrink: 0, opacity: 0.9 }}
+            inheritViewBox
+          />
+          <Box>
+            <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
+              实时流量
+            </Typography>
+            <Typography sx={{ fontSize: 9, color: '#8A98B5', letterSpacing: '1px', fontWeight: 500 }}>
+              TRAFFIC
+            </Typography>
+          </Box>
         </Box>
         {/* 下载/上传图例标签 */}
         <Box sx={{ display: 'flex', gap: 1 }}>

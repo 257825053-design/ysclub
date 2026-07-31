@@ -1,4 +1,4 @@
-import { Box, Button, LinearProgress, Typography, alpha } from '@mui/material'
+import { Box, Button, LinearProgress, Typography, alpha, SvgIcon } from '@mui/material'
 import { FiberManualRecord, ListAltOutlined, GraphicEqOutlined, MenuOutlined } from '@mui/icons-material'
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router'
 import { useProfiles } from '@/hooks/use-profiles'
 import { useSystemData } from '@/providers/app-data-context'
 import parseTraffic from '@/utils/parse-traffic'
+import iconDark from '@/assets/image/icon_dark.svg?react'
 
 /** 从 URL 中提取主机名 */
 const extractHostname = (url?: string): string => {
@@ -97,19 +98,14 @@ const SubscriptionInfoCard = memo(() => {
         }}
       />
 
-      {/* 头部：国旗 + 节点名 + 标签 + 波形 + 按钮 */}
+      {/* 头部：应用图标 + 节点名 + 标签 + 波形 + 按钮 */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* 圆形国旗图标 */}
-          <Box
-            sx={{
-              width: 24,
-              height: 24,
-              borderRadius: '50%',
-              background: 'linear-gradient(180deg, #B22234 0%, #B22234 46%, #FFFFFF 46%, #FFFFFF 54%, #3C3B6E 54%, #3C3B6E 100%)',
-              border: '1px solid rgba(0,0,0,0.1)',
-              flexShrink: 0,
-            }}
+          {/* 应用图标 */}
+          <SvgIcon
+            component={iconDark}
+            sx={{ width: 20, height: 20, flexShrink: 0 }}
+            inheritViewBox
           />
           <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>
             {current?.name || '—'}

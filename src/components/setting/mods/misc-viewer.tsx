@@ -200,19 +200,6 @@ export const MiscViewer = forwardRef<DialogRef>((props, ref) => {
 
         <ListItem sx={{ padding: '5px 2px' }}>
           <ListItemText
-            primary={t('settings.modals.misc.fields.autoCheckUpdate')}
-          />
-          <Switch
-            edge="end"
-            checked={values.autoCheckUpdate}
-            onChange={(_, c) =>
-              setValues((v) => ({ ...v, autoCheckUpdate: c }))
-            }
-          />
-        </ListItem>
-
-        <ListItem sx={{ padding: '5px 2px' }}>
-          <ListItemText
             primary={t('settings.modals.misc.fields.enableBuiltinEnhanced')}
             sx={{ maxWidth: 'fit-content' }}
           />

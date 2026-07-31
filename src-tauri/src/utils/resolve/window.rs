@@ -24,7 +24,7 @@ const MINIMAL_HEIGHT: f64 = 520.0;
 #[cfg(target_os = "linux")]
 const DEFAULT_DECORATIONS: bool = false;
 #[cfg(not(target_os = "linux"))]
-const DEFAULT_DECORATIONS: bool = true;
+const DEFAULT_DECORATIONS: bool = false;
 
 const fn restored_window_size_is_too_small(width: u32, height: u32) -> bool {
     width < MINIMAL_WIDTH as u32 || height < MINIMAL_HEIGHT as u32

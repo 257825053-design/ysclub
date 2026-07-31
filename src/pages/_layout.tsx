@@ -20,6 +20,7 @@ import {
   Paper,
   SvgIcon,
   ThemeProvider,
+  Typography,
 } from '@mui/material'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -30,7 +31,6 @@ import { Outlet, useNavigate } from 'react-router'
 
 import iconDark from '@/assets/image/icon_dark.svg?react'
 import iconLight from '@/assets/image/icon_light.svg?react'
-import LogoSvg from '@/assets/image/logo.svg?react'
 import { BaseErrorBoundary } from '@/components/base'
 import { LayoutItem } from '@/components/layout/layout-item'
 import { LayoutTraffic } from '@/components/layout/layout-traffic'
@@ -333,30 +333,17 @@ const Layout = () => {
                     }}
                     inheritViewBox
                   />
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 700,
-                        color: isDark ? '#FFFFFF' : '#000000',
-                        letterSpacing: '1px',
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      YSCLUB
-                    </span>
-                    <span
-                      style={{
-                        fontSize: '10px',
-                        fontWeight: 600,
-                        color: '#2378F5',
-                        letterSpacing: '2px',
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      PRO MEMBER
-                    </span>
-                  </div>
+                  <Typography
+                    sx={{
+                      fontSize: '18px',
+                      fontWeight: 800,
+                      color: '#FFFFFF',
+                      letterSpacing: '1.5px',
+                      lineHeight: 1,
+                    }}
+                  >
+                    YSCLUB
+                  </Typography>
                 </div>
               </div>
               <UpdateButton className="the-newbtn" />

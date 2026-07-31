@@ -6,7 +6,6 @@ import { useLockFn } from 'ahooks'
 
 import { useSystemData, useAppRefreshers } from '@/providers/app-data-context'
 import { useUptimeData } from '@/providers/app-data-context'
-import { useClash } from '@/hooks/use-clash'
 import { useVerge } from '@/hooks/use-verge'
 import { showNotice } from '@/services/notice-service'
 
@@ -35,7 +34,6 @@ const ConnectionPanel = memo(() => {
   const { t } = useTranslation()
   const { sysproxy, runningMode } = useSystemData()
   const { uptime } = useUptimeData()
-  const { version } = useClash()
   const { verge, patchVerge } = useVerge()
   const { refreshSysproxy, refreshAll } = useAppRefreshers()
 
@@ -181,7 +179,7 @@ const ConnectionPanel = memo(() => {
             fontFamily: 'monospace',
           }}
         >
-          v{version || '2.1.0'}
+          V.YS.1.0.0
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mt: 0.3 }}>
           <Box

@@ -1,8 +1,6 @@
 import { setCacheData, useQuery } from '@/services/query-client'
 import { checkUpdateSafe } from '@/services/update'
 
-import { useVerge } from './use-verge'
-
 const LAST_CHECK_KEY = 'last_check_update'
 
 export const readLastCheckTime = (): number | null => {
@@ -22,13 +20,9 @@ export const updateLastCheckTime = (timestamp?: number): number => {
 // --- useUpdate hook ---
 
 export const useUpdate = (enabled: boolean = true) => {
-  const { verge } = useVerge()
-  const { auto_check_update } = verge || {}
-
-  // Determine if we should check for updates
-  // If enabled is explicitly false, don't check
-  // Otherwise, respect the auto_check_update setting (or default to true if null/undefined for manual triggers)
-  const shouldCheck = enabled && auto_check_update !== false
+  // 更新检测功能已禁用，永远返回无更新状态
+  // 预留接口：未来需要启用更新检测时，将 shouldCheck 改回原始逻辑即可
+  const shouldCheck = false
 
   const {
     data: updateInfo,

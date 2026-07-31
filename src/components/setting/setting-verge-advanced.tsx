@@ -4,7 +4,6 @@ import { useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { DialogRef, TooltipIcon } from '@/components/base'
-import { updateLastCheckTime } from '@/hooks/use-update'
 import {
   exitApp,
   exportDiagnosticInfo,
@@ -14,7 +13,6 @@ import {
   openLogsDir,
 } from '@/services/cmds'
 import { showNotice } from '@/services/notice-service'
-import { checkUpdateSafe as checkUpdate } from '@/services/update'
 import { version } from '@root/package.json'
 
 import { BackupViewer } from './mods/backup-viewer'
@@ -43,29 +41,13 @@ const SettingVergeAdvanced = ({ onError: _ }: Props) => {
   const backupRef = useRef<DialogRef>(null)
   const liteModeRef = useRef<DialogRef>(null)
 
-  const onCheckUpdate = async () => {
-    try {
-      const info = await checkUpdate()
-      updateLastCheckTime()
-      if (!info?.available) {
-        showNotice.success(
-          'settings.components.verge.advanced.notifications.latestVersion',
-        )
-      } else {
-        updateRef.current?.open()
-      }
-    } catch (err: any) {
-      showNotice.error(err)
-    }
-  }
-
   const onExportDiagnosticInfo = useCallback(async () => {
     await exportDiagnosticInfo()
     showNotice.success('shared.feedback.notifications.common.copySuccess', 1000)
   }, [])
 
   const copyVersion = useCallback(() => {
-    navigator.clipboard.writeText(`v${version}`).then(() => {
+    navigator.clipboard.writeText(`V.YS.${version}`).then(() => {
       showNotice.success(
         'settings.components.verge.advanced.notifications.versionCopied',
         1000,
@@ -122,11 +104,6 @@ const SettingVergeAdvanced = ({ onError: _ }: Props) => {
       />
 
       <SettingItem
-        onClick={onCheckUpdate}
-        label={t('settings.components.verge.advanced.fields.checkUpdates')}
-      />
-
-      <SettingItem
         onClick={openDevTools}
         label={t('settings.components.verge.advanced.fields.openDevTools')}
       />
@@ -169,7 +146,7 @@ const SettingVergeAdvanced = ({ onError: _ }: Props) => {
           />
         }
       >
-        <Typography sx={{ py: '7px', pr: 1 }}>v{version}</Typography>
+        <Typography sx={{ py: '7px', pr: 1 }}>V.YS.{version}</Typography>
       </SettingItem>
     </SettingList>
   )

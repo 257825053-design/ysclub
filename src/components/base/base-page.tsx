@@ -21,9 +21,20 @@ export const BasePage: React.FC<Props> = (props) => {
   return (
     <BaseErrorBoundary>
       <div className="base-page">
-        <header data-tauri-drag-region="true" style={{ userSelect: 'none' }}>
+        <header
+          data-tauri-drag-region="true"
+          style={{
+            userSelect: 'none',
+            backgroundColor: isDark ? '#0B101C' : '#ffffff',
+            borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+          }}
+        >
           <Typography
-            sx={{ fontSize: '20px', fontWeight: '700 ' }}
+            sx={{
+              fontSize: '18px',
+              fontWeight: 700,
+              color: isDark ? '#FFFFFF' : '#000000',
+            }}
             data-tauri-drag-region="true"
           >
             {title}
@@ -34,11 +45,11 @@ export const BasePage: React.FC<Props> = (props) => {
 
         <div
           className={full ? 'base-container no-padding' : 'base-container'}
-          style={{ backgroundColor: isDark ? '#1e1f27' : '#ffffff' }}
+          style={{ backgroundColor: isDark ? '#0B101C' : '#ffffff' }}
         >
           <section
             style={{
-              backgroundColor: isDark ? '#1e1f27' : 'var(--background-color)',
+              backgroundColor: isDark ? '#0B101C' : 'var(--background-color)',
             }}
           >
             <div className="base-content" style={contentStyle}>
