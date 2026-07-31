@@ -377,13 +377,12 @@ const UnlockPage = () => {
                   height: '100%',
                   borderRadius: 2,
                   borderLeft: `4px solid ${getStatusBorderColor(item.status)}`,
-                  backgroundColor: isDark ? '#282a36' : '#ffffff',
+                  backgroundColor: '#131A2B',
+                  border: '1px solid rgba(255, 255, 255, 0.06)',
                   position: 'relative',
                   overflow: 'hidden',
                   '&:hover': {
-                    backgroundColor: isDark
-                      ? alpha(theme.palette.primary.dark, 0.05)
-                      : alpha(theme.palette.primary.light, 0.05),
+                    backgroundColor: alpha(theme.palette.primary.dark, 0.08),
                   },
                   display: 'flex',
                   flexDirection: 'column',

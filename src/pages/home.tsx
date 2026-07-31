@@ -46,9 +46,10 @@ const HomePage = () => {
           spacing={{ xs: 0.75, sm: 1 }}
           sx={{
             width: '100%',
-            maxWidth: 1100,
+            maxWidth: '100%',
             mx: 'auto',
             minHeight: 'min-content',
+            flex: 1,
           }}
         >
           {/* 第一区域：Banner 横幅 */}

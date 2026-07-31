@@ -7,7 +7,6 @@ import SettingSystem from '@/components/setting/setting-system'
 import SettingVergeAdvanced from '@/components/setting/setting-verge-advanced'
 import SettingVergeBasic from '@/components/setting/setting-verge-basic'
 import { showNotice } from '@/services/notice-service'
-import { useThemeMode } from '@/services/states'
 
 const SettingPage = () => {
   const { t } = useTranslation()
@@ -16,20 +15,17 @@ const SettingPage = () => {
     showNotice.error(err)
   }
 
-  const mode = useThemeMode()
-  const isDark = mode === 'light' ? false : true
-
   return (
-    <BasePage
-      title={t('settings.page.title')}
-    >
+    <BasePage title={t('settings.page.title')}>
       <Grid container spacing={1.5} columns={{ xs: 6, sm: 6, md: 12 }}>
         <Grid size={6}>
           <Box
             sx={{
               borderRadius: 2,
               marginBottom: 1.5,
-              backgroundColor: isDark ? '#282a36' : '#ffffff',
+              backgroundColor: '#131A2B',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
             }}
           >
             <SettingSystem onError={onError} />
@@ -37,7 +33,9 @@ const SettingPage = () => {
           <Box
             sx={{
               borderRadius: 2,
-              backgroundColor: isDark ? '#282a36' : '#ffffff',
+              backgroundColor: '#131A2B',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
             }}
           >
             <SettingClash onError={onError} />
@@ -48,7 +46,9 @@ const SettingPage = () => {
             sx={{
               borderRadius: 2,
               marginBottom: 1.5,
-              backgroundColor: isDark ? '#282a36' : '#ffffff',
+              backgroundColor: '#131A2B',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
             }}
           >
             <SettingVergeBasic onError={onError} />
@@ -56,7 +56,9 @@ const SettingPage = () => {
           <Box
             sx={{
               borderRadius: 2,
-              backgroundColor: isDark ? '#282a36' : '#ffffff',
+              backgroundColor: '#131A2B',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
             }}
           >
             <SettingVergeAdvanced onError={onError} />

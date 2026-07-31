@@ -99,7 +99,7 @@ const QuickToolsCard = memo(() => {
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(5, 1fr)',
+          gridTemplateColumns: { xs: 'repeat(3, 1fr)', sm: 'repeat(5, 1fr)' },
           gap: 1,
         }}
       >

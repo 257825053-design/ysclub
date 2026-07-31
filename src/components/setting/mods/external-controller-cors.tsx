@@ -276,12 +276,12 @@ export const HeaderConfiguration = forwardRef<ClashHeaderConfigingRef>(
                 style={{
                   marginTop: 12,
                   padding: 8,
-                  backgroundColor: '#f5f5f5',
+                  backgroundColor: 'rgba(255, 255, 255, 0.04)',
                   borderRadius: 4,
                 }}
               >
                 <div
-                  style={{ color: '#666', fontSize: 12, fontStyle: 'italic' }}
+                  style={{ color: '#8A98B5', fontSize: 12, fontStyle: 'italic' }}
                 >
                   {t('settings.sections.externalCors.messages.alwaysIncluded', {
                     urls: DEV_URLS.join(', '),

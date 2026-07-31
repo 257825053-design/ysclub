@@ -3,11 +3,10 @@ import {
   getCurrentWebviewWindow,
   WebviewWindow,
 } from '@tauri-apps/api/webviewWindow'
-import { Theme as TauriOsTheme } from '@tauri-apps/api/window'
 import { useEffect, useMemo } from 'react'
 
 import { useVerge } from '@/hooks/use-verge'
-import { defaultDarkTheme, defaultTheme } from '@/pages/_theme'
+import { defaultDarkTheme } from '@/pages/_theme'
 import { useSetThemeMode, useThemeMode } from '@/services/states'
 
 const CSS_INJECTION_SCOPE_ROOT = '[data-css-injection-root]'
@@ -74,76 +73,23 @@ export const useCustomTheme = () => {
   const userBackgroundImage = theme_setting?.background_image || ''
   const hasUserBackground = !!userBackgroundImage
 
+  // 强制使用深色模式 - YSCLUB Tech Theme
   useEffect(() => {
-    if (theme_mode === 'light' || theme_mode === 'dark') {
-      setMode(theme_mode)
-    }
-  }, [theme_mode, setMode])
+    setMode('dark')
+  }, [setMode])
 
+  // 强制窗口主题为深色
   useEffect(() => {
-    if (theme_mode !== 'system') {
-      return
-    }
-
-    let isMounted = true
-
-    const timerId = setTimeout(() => {
-      if (!isMounted) return
-      appWindow
-        .theme()
-        .then((systemTheme) => {
-          if (isMounted && systemTheme) {
-            setMode(systemTheme)
-          }
-        })
-        .catch((err) => {
-          console.error('Failed to get initial system theme:', err)
-        })
-    }, 0)
-
-    const unlistenPromise = appWindow.onThemeChanged(({ payload }) => {
-      if (isMounted) {
-        setMode(payload)
-      }
+    appWindow.setTheme('dark').catch((err) => {
+      console.error('Failed to set window theme to dark:', err)
     })
-
-    return () => {
-      isMounted = false
-      clearTimeout(timerId)
-      unlistenPromise
-        .then((unlistenFn) => {
-          if (typeof unlistenFn === 'function') {
-            unlistenFn()
-          }
-        })
-        .catch((err) => {
-          console.error('Failed to unlisten from theme changes:', err)
-        })
-    }
-  }, [theme_mode, appWindow, setMode])
-
-  useEffect(() => {
-    if (theme_mode === undefined) {
-      return
-    }
-
-    if (theme_mode === 'system') {
-      appWindow.setTheme(null).catch((err) => {
-        console.error(
-          'Failed to set window theme to follow system (setTheme(null)):',
-          err,
-        )
-      })
-    } else if (mode) {
-      appWindow.setTheme(mode as TauriOsTheme).catch((err) => {
-        console.error(`Failed to set window theme to ${mode}:`, err)
-      })
-    }
-  }, [mode, appWindow, theme_mode])
+  }, [appWindow])
 
   const theme = useMemo(() => {
     const setting = theme_setting || {}
-    const dt = mode === 'light' ? defaultTheme : defaultDarkTheme
+    // 强制使用深色主题 - YSCLUB Tech Theme
+    const dt = defaultDarkTheme
+    const effectiveMode = 'dark' as const
     let muiTheme: MuiTheme
 
     try {
@@ -152,7 +98,7 @@ export const useCustomTheme = () => {
           values: { xs: 0, sm: 650, md: 900, lg: 1200, xl: 1536 },
         },
         palette: {
-          mode,
+          mode: effectiveMode,
           primary: { main: setting.primary_color || dt.primary_color },
           secondary: { main: setting.secondary_color || dt.secondary_color },
           info: { main: setting.info_color || dt.info_color },
@@ -182,7 +128,7 @@ export const useCustomTheme = () => {
           values: { xs: 0, sm: 650, md: 900, lg: 1200, xl: 1536 },
         },
         palette: {
-          mode,
+          mode: effectiveMode,
           primary: { main: dt.primary_color },
           secondary: { main: dt.secondary_color },
           info: { main: dt.info_color },
@@ -201,11 +147,10 @@ export const useCustomTheme = () => {
 
     const rootEle = document.documentElement
     if (rootEle) {
-      const backgroundColor = mode === 'light' ? '#ECECEC' : dt.background_color
-      const selectColor = mode === 'light' ? '#f5f5f5' : '#3E3E3E'
-      const scrollColor = mode === 'light' ? '#90939980' : '#555555'
-      const dividerColor =
-        mode === 'light' ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.06)'
+      const backgroundColor = dt.background_color
+      const selectColor = '#3E3E3E'
+      const scrollColor = '#555555'
+      const dividerColor = 'rgba(255, 255, 255, 0.06)'
       rootEle.style.setProperty('--divider-color', dividerColor)
       rootEle.style.setProperty('--background-color', backgroundColor)
       rootEle.style.setProperty('--selection-color', selectColor)
@@ -215,18 +160,9 @@ export const useCustomTheme = () => {
         '--background-color-alpha',
         alpha(muiTheme.palette.primary.main, 0.1),
       )
-      rootEle.style.setProperty(
-        '--window-border-color',
-        mode === 'light' ? '#cccccc' : '#1E1E1E',
-      )
-      rootEle.style.setProperty(
-        '--scrollbar-bg',
-        mode === 'light' ? '#f1f1f1' : '#2E303D',
-      )
-      rootEle.style.setProperty(
-        '--scrollbar-thumb',
-        mode === 'light' ? '#c1c1c1' : '#555555',
-      )
+      rootEle.style.setProperty('--window-border-color', '#1E1E1E')
+      rootEle.style.setProperty('--scrollbar-bg', '#2E303D')
+      rootEle.style.setProperty('--scrollbar-thumb', '#555555')
       rootEle.style.setProperty(
         '--user-background-image',
         hasUserBackground ? `url('${userBackgroundImage}')` : 'none',
@@ -269,7 +205,7 @@ export const useCustomTheme = () => {
           border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-          background-color: ${mode === 'light' ? '#a1a1a1' : '#666666'};
+          background-color: #666666;
         }
 
         /* 背景图处理 */
@@ -292,17 +228,101 @@ export const useCustomTheme = () => {
         /* 修复可能的白色边框 */
         .MuiPaper-root {
           border-color: var(--window-border-color) !important;
+          background-color: #131A2B !important;
+          color: #FFFFFF !important;
         }
 
         /* 确保模态框和对话框也使用暗色主题 */
         .MuiDialog-paper {
-          background-color: ${mode === 'light' ? '#ffffff' : '#2E303D'} !important;
+          background-color: #131A2B !important;
+          color: #FFFFFF !important;
+        }
+
+        /* 下拉菜单使用暗色主题 */
+        .MuiMenu-paper,
+        .MuiPopover-paper {
+          background-color: #131A2B !important;
+          color: #FFFFFF !important;
+        }
+
+        /* MUI Card 组件统一深色 */
+        .MuiCard-root {
+          background-color: #131A2B !important;
+          color: #FFFFFF !important;
+        }
+
+        /* MUI 表格组件统一深色 */
+        .MuiTableContainer-root,
+        .MuiTableCell-root {
+          background-color: #131A2B !important;
+          color: #FFFFFF !important;
+          border-color: rgba(255, 255, 255, 0.06) !important;
+        }
+
+        .MuiTableHead-root .MuiTableCell-root {
+          background-color: #0F1729 !important;
+          color: #D0D8E8 !important;
+          font-weight: 600 !important;
+        }
+
+        /* MUI 输入框统一深色 */
+        .MuiOutlinedInput-root {
+          background-color: rgba(255, 255, 255, 0.03) !important;
+        }
+
+        .MuiOutlinedInput-notchedOutline {
+          border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+          border-color: rgba(35, 120, 245, 0.3) !important;
+        }
+
+        .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+          border-color: #2378F5 !important;
+        }
+
+        /* MUI 列表项统一深色 */
+        .MuiListItem-root,
+        .MuiListItemButton-root {
+          color: #FFFFFF !important;
+        }
+
+        .MuiListItemButton-root:hover {
+          background-color: rgba(255, 255, 255, 0.04) !important;
+        }
+
+        .MuiMenuItem-root {
+          color: #FFFFFF !important;
+        }
+
+        .MuiMenuItem-root:hover {
+          background-color: rgba(35, 120, 245, 0.08) !important;
+        }
+
+        .MuiMenuItem-root.Mui-selected {
+          background-color: rgba(35, 120, 245, 0.12) !important;
+        }
+
+        /* MUI 开关组件 */
+        .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
+          background-color: #2378F5 !important;
+        }
+
+        /* MUI 分割线 */
+        .MuiDivider-root {
+          border-color: rgba(255, 255, 255, 0.06) !important;
+        }
+
+        /* MUI 工具提示 */
+        .MuiTooltip-tooltip {
+          background-color: #1A2744 !important;
+          color: #FFFFFF !important;
         }
 
         /* 移除可能的白色点或线条 */
         * {
           outline: none !important;
-          box-shadow: none !important;
         }
       `
 
