@@ -85,7 +85,7 @@ pub fn apply_dwm_window_style(window: &WebviewWindow) {
     };
 
     let hwnd: isize = match handle.as_raw() {
-        RawWindowHandle::Win32(h) => h.hwnd.as_ptr() as isize,
+        RawWindowHandle::Win32(h) => h.hwnd.get() as isize,
         _ => return,
     };
 
