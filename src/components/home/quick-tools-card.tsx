@@ -33,6 +33,7 @@ const QuickToolsCard = memo(() => {
       path: '/test',
       color: '#2378F5',
       external: false,
+      disabled: true,
     },
     {
       icon: <SpeedOutlined sx={{ fontSize: 20 }} />,
@@ -41,6 +42,7 @@ const QuickToolsCard = memo(() => {
       path: 'https://test.ustc.edu.cn/',
       color: '#36D399',
       external: true,
+      disabled: false,
     },
     {
       icon: <DataUsageOutlined sx={{ fontSize: 20 }} />,
@@ -49,6 +51,7 @@ const QuickToolsCard = memo(() => {
       path: '/connection',
       color: '#F59E0B',
       external: false,
+      disabled: false,
     },
     {
       icon: <DescriptionOutlined sx={{ fontSize: 20 }} />,
@@ -57,6 +60,7 @@ const QuickToolsCard = memo(() => {
       path: '/logs',
       color: '#EF4444',
       external: false,
+      disabled: false,
     },
     {
       icon: <RuleOutlined sx={{ fontSize: 20 }} />,
@@ -65,6 +69,7 @@ const QuickToolsCard = memo(() => {
       path: '/rules',
       color: '#4F46E5',
       external: false,
+      disabled: false,
     },
   ]
 
@@ -107,6 +112,7 @@ const QuickToolsCard = memo(() => {
           <Box
             key={tool.label}
             onClick={() => {
+              if (tool.disabled) return
               if (tool.external) {
                 openWebUrl(tool.path)
               } else {
@@ -121,15 +127,19 @@ const QuickToolsCard = memo(() => {
               py: 0.8,
               px: 0.5,
               borderRadius: 2,
-              cursor: 'pointer',
+              cursor: tool.disabled ? 'default' : 'pointer',
               transition: 'all 0.2s ease',
               bgcolor: 'rgba(255, 255, 255, 0.02)',
               border: '1px solid rgba(255, 255, 255, 0.04)',
-              '&:hover': {
-                bgcolor: alpha(tool.color, 0.08),
-                borderColor: alpha(tool.color, 0.2),
-                transform: 'translateY(-2px)',
-              },
+              opacity: tool.disabled ? 0.35 : 1,
+              pointerEvents: 'auto',
+              '&:hover': tool.disabled
+                ? {}
+                : {
+                    bgcolor: alpha(tool.color, 0.08),
+                    borderColor: alpha(tool.color, 0.2),
+                    transform: 'translateY(-2px)',
+                  },
             }}
           >
             <Box
@@ -140,15 +150,22 @@ const QuickToolsCard = memo(() => {
                 width: 28,
                 height: 28,
                 borderRadius: 1.5,
-                bgcolor: alpha(tool.color, 0.1),
-                color: tool.color,
+                bgcolor: alpha(tool.color, tool.disabled ? 0.05 : 0.1),
+                color: tool.disabled ? alpha(tool.color, 0.5) : tool.color,
                 transition: 'all 0.2s ease',
               }}
             >
               {tool.icon}
             </Box>
             <Box sx={{ textAlign: 'center' }}>
-              <Typography sx={{ fontSize: 11, fontWeight: 600, color: '#FFFFFF', lineHeight: 1.3 }}>
+              <Typography
+                sx={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: tool.disabled ? '#8A98B5' : '#FFFFFF',
+                  lineHeight: 1.3,
+                }}
+              >
                 {tool.label}
               </Typography>
               <Typography sx={{ fontSize: 9, color: '#8A98B5', lineHeight: 1.3 }}>

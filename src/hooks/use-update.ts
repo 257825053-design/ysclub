@@ -1,5 +1,4 @@
 import { setCacheData, useQuery } from '@/services/query-client'
-import { checkUpdateSafe } from '@/services/update'
 
 const LAST_CHECK_KEY = 'last_check_update'
 

@@ -25,13 +25,11 @@ const extractHostname = (url?: string): string => {
 /**
  * SubscriptionInfoCard - 订阅信息卡片（白底卡片）
  *
- * 设计规格（像素级还原）：
- * - 白底卡片 #FFFFFF，与其他深色卡片强烈区分
- * - 底层叠加低透明度浅淡蓝色网点世界地图水印
- * - 左上角圆形国旗 + 节点名 + 已连接/已断开标签 + 波形图标
- * - 右上角"订阅管理"蓝色描边按钮 + 三横线菜单图标
- * - 服务器地址、协议、更新时间、到期时间、流量使用（全部为变量）
- * - 底部进度条 + 百分比
+ * 设计规格：
+ * - 白底卡片 #FFFFFF，底层叠加低透明度浅淡蓝色网点世界地图水印
+ * - 字体适当增大提升可读性
+ * - 进度条带有从左到右流动的光效动效
+ * - 紧凑布局减少底部留白
  */
 const SubscriptionInfoCard = memo(() => {
   const { t } = useTranslation()
@@ -45,7 +43,6 @@ const SubscriptionInfoCard = memo(() => {
   const serverHost = useMemo(() => extractHostname(current?.url), [current?.url])
   const updateTime = useMemo(() => {
     if (!current?.updated) return '—'
-    // Handle both seconds (actual app) and milliseconds (preview mock)
     const ts = current.updated > 1e12 ? current.updated : current.updated * 1000
     return dayjs(ts).format('YYYY-MM-DD HH:mm')
   }, [current?.updated])
@@ -83,20 +80,43 @@ const SubscriptionInfoCard = memo(() => {
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
         display: 'flex',
         flexDirection: 'column',
-        gap: 1,
+        gap: 0.75,
         overflow: 'hidden',
       }}
     >
+      {/* 全局光效动画样式 */}
+      <style>{`
+        @keyframes progressLight {
+          0% { left: -30%; }
+          100% { left: 130%; }
+        }
+        .light-bar-progress .MuiLinearProgress-bar {
+          position: relative;
+          overflow: hidden;
+        }
+        .light-bar-progress .MuiLinearProgress-bar::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -30%;
+          width: 30%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+          animation: progressLight 2.5s ease-in-out infinite;
+          pointer-events: none;
+        }
+      `}</style>
+
       {/* 头部：应用图标 + 节点名 + 标签 + 波形 + 按钮 */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {/* 应用图标 */}
           <SvgIcon
             component={iconDark}
-            sx={{ width: 20, height: 20, flexShrink: 0 }}
+            sx={{ width: 22, height: 22, flexShrink: 0 }}
             inheritViewBox
           />
-          <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>
+          <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>
             {current?.name || '—'}
           </Typography>
           {/* 连接状态标签 */}
@@ -104,33 +124,33 @@ const SubscriptionInfoCard = memo(() => {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              gap: 0.3,
-              px: 0.75,
-              py: 0.2,
+              gap: 0.4,
+              px: 0.8,
+              py: 0.25,
               borderRadius: 1,
               bgcolor: isConnected ? alpha('#22C55E', 0.1) : alpha('#9CA3AF', 0.1),
             }}
           >
-            <FiberManualRecord sx={{ fontSize: 6, color: isConnected ? '#22C55E' : '#9CA3AF' }} />
-            <Typography sx={{ fontSize: 10, fontWeight: 600, color: isConnected ? '#22C55E' : '#9CA3AF' }}>
+            <FiberManualRecord sx={{ fontSize: 7, color: isConnected ? '#22C55E' : '#9CA3AF' }} />
+            <Typography sx={{ fontSize: 11, fontWeight: 600, color: isConnected ? '#22C55E' : '#9CA3AF' }}>
               {isConnected ? '已连接' : '已断开'}
             </Typography>
           </Box>
           {/* 波形图标 - 仅连接时显示绿色 */}
-          {isConnected && <GraphicEqOutlined sx={{ fontSize: 14, color: '#22C55E' }} />}
+          {isConnected && <GraphicEqOutlined sx={{ fontSize: 16, color: '#22C55E' }} />}
         </Box>
         <Button
           size="small"
           variant="outlined"
-          startIcon={<ListAltOutlined sx={{ fontSize: 13 }} />}
-          endIcon={<MenuOutlined sx={{ fontSize: 13 }} />}
+          startIcon={<ListAltOutlined sx={{ fontSize: 14 }} />}
+          endIcon={<MenuOutlined sx={{ fontSize: 14 }} />}
           onClick={() => navigate('/profiles')}
           sx={{
             borderRadius: 1.5,
             textTransform: 'none',
             borderColor: '#2176F4',
             color: '#2176F4',
-            fontSize: 11,
+            fontSize: 12,
             px: 1.2,
             py: 0.3,
             minWidth: 'auto',
@@ -145,7 +165,7 @@ const SubscriptionInfoCard = memo(() => {
       </Box>
 
       {/* 信息列表 */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, position: 'relative', zIndex: 1 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, position: 'relative', zIndex: 1 }}>
         {[
           { label: '服务器地址', value: serverHost },
           { label: '协议', value: protocol },
@@ -154,10 +174,10 @@ const SubscriptionInfoCard = memo(() => {
           { label: '已使用 / 总量', value: `${used} ${usedUnit} / ${total} ${totalUnit}` },
         ].map((item) => (
           <Box key={item.label} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography sx={{ fontSize: 11, color: '#9CA3AF' }}>
+            <Typography sx={{ fontSize: 12, color: '#9CA3AF' }}>
               {item.label}
             </Typography>
-            <Typography sx={{ fontSize: 11, color: '#1A1A1A', fontWeight: 500, fontFamily: 'monospace' }}>
+            <Typography sx={{ fontSize: 12, color: '#1A1A1A', fontWeight: 500, fontFamily: 'monospace' }}>
               {item.value}
             </Typography>
           </Box>
@@ -165,26 +185,27 @@ const SubscriptionInfoCard = memo(() => {
       </Box>
 
       {/* 进度条 */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, position: 'relative', zIndex: 1 }}>
-        <Typography sx={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, position: 'relative', zIndex: 1, mt: 0.25 }}>
+        <Typography sx={{ fontSize: 12, color: '#9CA3AF', flexShrink: 0 }}>
           使用进度
         </Typography>
         <Box sx={{ flex: 1 }}>
           <LinearProgress
             variant="determinate"
             value={usagePercent}
+            className="light-bar-progress"
             sx={{
-              height: 5,
-              borderRadius: 3,
+              height: 7,
+              borderRadius: 3.5,
               bgcolor: '#F3F4F6',
               '& .MuiLinearProgress-bar': {
-                borderRadius: 3,
+                borderRadius: 3.5,
                 background: 'linear-gradient(90deg, #93C5FD, #2176F4)',
               },
             }}
           />
         </Box>
-        <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#1A1A1A', minWidth: 32, textAlign: 'right' }}>
+        <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A', minWidth: 36, textAlign: 'right' }}>
           {usagePercent}%
         </Typography>
       </Box>

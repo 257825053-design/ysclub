@@ -10,21 +10,16 @@ import { memo, useEffect, useRef, useState } from 'react'
 import iconDark from '@/assets/image/icon_dark.svg?react'
 
 /**
- * HeroBanner - 首页顶部品牌横幅（分层悬浮文字版）
+ * HeroBanner - 首页顶部品牌横幅（分层自适应版）
  *
- * 架构：背景图底层（z-index:1）+ 悬浮文字组件上层（z-index:10）
- * 背景：/images/hero-banner-bg.png，object-fit: cover, object-position: left center
- * 容器：min-height: 130px, max-height: 190px, overflow: hidden
+ * 架构：背景图底层（z-index:1）+ 渐变遮罩层（z-index:2）+ 悬浮文字内容层（z-index:10）
  *
- * 5层悬浮元素（从上至下）：
- * 1. 品牌栏：YSCLUB图标 + YSCLUB文字 + 分隔符 + 标语
- * 2. 主标题：安全连接 畅行全球（蓝色外发光）
- * 3. 副标题：更快·更稳定·更安全的专业级全球网络代理服务
- * 4. 四大功能标签：银行级加密 / 高速稳定 / 全球覆盖 / 多端支持
- * 5. 右上角手写标语：让每一次连接都更自由
- *
- * 自适应：窗口缩小时文字锚点靠左，右侧背景被裁切，左侧核心文字始终可见。
- * 当容器高度压缩至130px时，所有文字按比例缩小。
+ * 自适应策略：
+ * 1. 容器高度 120-200px，通过 ResizeObserver 监听高度变化
+ * 2. 以 190px 为基准高度计算 scale（0.6~1.0），所有尺寸按 scale 等比缩放
+ * 3. 内容使用 flexbox 垂直居中，确保任何高度下文字都在容器内
+ * 4. 右侧手写标语在窄屏（<900px）时隐藏，避免与左侧文字重叠
+ * 5. 底部功能标签在极窄屏（<600px）时隐藏
  */
 const HeroBanner = memo(() => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -36,8 +31,8 @@ const HeroBanner = memo(() => {
 
     const updateScale = () => {
       const height = container.clientHeight
-      // 参考高度190px对应scale=1，130px对应scale≈0.68
-      const newScale = Math.max(0.68, Math.min(1, height / 190))
+      // 参考高度 190px → scale=1，120px → scale≈0.63
+      const newScale = Math.max(0.6, Math.min(1, height / 190))
       setScale(newScale)
     }
 
@@ -52,26 +47,10 @@ const HeroBanner = memo(() => {
 
   // 功能标签数据
   const featureTags = [
-    {
-      icon: <ShieldOutlined sx={{ fontSize: s(18), color: '#FFFFFF' }} />,
-      title: '银行级加密',
-      subtitle: '全程守护您的网络安全',
-    },
-    {
-      icon: <BoltOutlined sx={{ fontSize: s(18), color: '#FFFFFF' }} />,
-      title: '高速稳定',
-      subtitle: '全球优质专线节点',
-    },
-    {
-      icon: <PublicOutlined sx={{ fontSize: s(18), color: '#FFFFFF' }} />,
-      title: '全球覆盖',
-      subtitle: '一键畅连200+国家/地区',
-    },
-    {
-      icon: <DevicesOutlined sx={{ fontSize: s(18), color: '#FFFFFF' }} />,
-      title: '多端支持',
-      subtitle: 'Windows / Mac / 移动端',
-    },
+    { Icon: ShieldOutlined, title: '银行级加密', subtitle: '全程守护' },
+    { Icon: BoltOutlined, title: '高速稳定', subtitle: '优质专线' },
+    { Icon: PublicOutlined, title: '全球覆盖', subtitle: '200+国家' },
+    { Icon: DevicesOutlined, title: '多端支持', subtitle: 'Win/Mac' },
   ]
 
   return (
@@ -80,9 +59,9 @@ const HeroBanner = memo(() => {
       sx={{
         position: 'relative',
         width: '100%',
-        minHeight: 130,
-        maxHeight: 190,
-        height: { xs: 130, sm: 145, md: 165, lg: 180, xl: 190 },
+        height: { xs: 120, sm: 140, md: 160, lg: 175, xl: 190 },
+        minHeight: 120,
+        maxHeight: 200,
         borderRadius: 2,
         overflow: 'hidden',
         flexShrink: 0,
@@ -107,6 +86,21 @@ const HeroBanner = memo(() => {
         }}
       />
 
+      {/* ========== 渐变遮罩层：增强左侧文字可读性 z-index:2 ========== */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background:
+            'linear-gradient(90deg, rgba(8,15,36,0.7) 0%, rgba(8,15,36,0.3) 55%, transparent 100%)',
+          zIndex: 2,
+          pointerEvents: 'none',
+        }}
+      />
+
       {/* ========== 上层：悬浮文字内容 z-index:10 ========== */}
       <Box
         sx={{
@@ -116,35 +110,36 @@ const HeroBanner = memo(() => {
           right: 0,
           bottom: 0,
           zIndex: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          pl: s(32),
+          pr: s(32),
           overflow: 'hidden',
         }}
       >
-        {/* 第一层：左上角品牌栏 */}
+        {/* 第一层：品牌栏 */}
         <Box
           sx={{
-            position: 'absolute',
-            left: s(48),
-            top: s(32),
             display: 'flex',
             alignItems: 'center',
-            gap: s(14),
+            gap: s(10),
+            mb: s(6),
           }}
         >
-          {/* YSCLUB蓝色LOGO图标 */}
           <SvgIcon
             component={iconDark}
             sx={{
-              width: s(24),
-              height: s(24),
+              width: s(20),
+              height: s(20),
               flexShrink: 0,
               filter: 'drop-shadow(0 0 4px rgba(0, 170, 255, 0.6))',
             }}
             inheritViewBox
           />
-          {/* YSCLUB文字 */}
           <Typography
             sx={{
-              fontSize: s(24),
+              fontSize: s(20),
               fontWeight: 600,
               color: '#FFFFFF',
               lineHeight: 1,
@@ -153,10 +148,9 @@ const HeroBanner = memo(() => {
           >
             YSCLUB
           </Typography>
-          {/* 竖线分隔符 */}
           <Typography
             sx={{
-              fontSize: s(24),
+              fontSize: s(20),
               color: '#FFFFFF',
               opacity: 0.4,
               lineHeight: 1,
@@ -164,12 +158,11 @@ const HeroBanner = memo(() => {
           >
             |
           </Typography>
-          {/* 标语 */}
           <Typography
             sx={{
-              fontSize: s(20),
+              fontSize: s(16),
               color: '#FFFFFF',
-              opacity: 0.9,
+              opacity: 0.85,
               lineHeight: 1,
               whiteSpace: 'nowrap',
             }}
@@ -181,13 +174,10 @@ const HeroBanner = memo(() => {
         {/* 第二层：主标题（蓝色外发光） */}
         <Typography
           sx={{
-            position: 'absolute',
-            left: s(48),
-            top: s(92), // 32(品牌栏top) + 24(品牌栏高度) + 36(间距)
-            fontSize: s(68),
+            fontSize: s(40),
             fontWeight: 700,
             color: '#FFFFFF',
-            lineHeight: 1,
+            lineHeight: 1.1,
             whiteSpace: 'nowrap',
             textShadow:
               '0 0 20px rgba(0, 170, 255, 0.5), 0 0 40px rgba(0, 128, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.4)',
@@ -199,99 +189,97 @@ const HeroBanner = memo(() => {
         {/* 第三层：副标题 */}
         <Typography
           sx={{
-            position: 'absolute',
-            left: s(48),
-            top: s(176), // 92(主标题top) + 68(主标题高度) + 16(间距)
-            fontSize: s(28),
+            fontSize: s(15),
             color: '#FFFFFF',
-            opacity: 0.82,
+            opacity: 0.8,
             lineHeight: 1,
             whiteSpace: 'nowrap',
+            mt: s(4),
           }}
         >
           更快·更稳定·更安全的专业级全球网络代理服务
         </Typography>
 
-        {/* 第四层：四大功能标签组 */}
+        {/* 第四层：四大功能标签组（窄屏隐藏） */}
         <Box
           sx={{
-            position: 'absolute',
-            left: s(48),
-            top: s(246), // 176(副标题top) + 28(副标题高度) + 42(间距)
-            display: 'flex',
-            gap: s(24),
+            display: { xs: 'none', sm: 'flex' },
+            gap: s(10),
+            mt: s(8),
           }}
         >
-          {featureTags.map((tag) => (
+          {featureTags.map(({ Icon, title, subtitle }) => (
             <Box
-              key={tag.title}
+              key={title}
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: s(8),
-                px: s(22),
-                py: s(14),
-                borderRadius: s(16),
+                gap: s(6),
+                px: s(12),
+                py: s(6),
+                borderRadius: s(10),
                 bgcolor: 'rgba(15, 35, 75, 0.55)',
                 backdropFilter: 'blur(4px)',
                 border: '1px solid rgba(0, 170, 255, 0.15)',
               }}
             >
-              {tag.icon}
+              <Icon sx={{ fontSize: s(14), color: '#FFFFFF' }} />
               <Box>
                 <Typography
                   sx={{
-                    fontSize: s(14),
+                    fontSize: s(11),
                     fontWeight: 600,
                     color: '#FFFFFF',
                     lineHeight: 1.2,
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {tag.title}
+                  {title}
                 </Typography>
                 <Typography
                   sx={{
-                    fontSize: s(11),
+                    fontSize: s(9),
                     color: '#FFFFFF',
-                    opacity: 0.75,
+                    opacity: 0.7,
                     lineHeight: 1.3,
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {tag.subtitle}
+                  {subtitle}
                 </Typography>
               </Box>
             </Box>
           ))}
         </Box>
+      </Box>
 
-        {/* 第五层：右上角手写标语 */}
-        <Box
+      {/* 第五层：右上角手写标语（窄屏隐藏） */}
+      <Box
+        sx={{
+          position: 'absolute',
+          right: s(28),
+          top: s(16),
+          zIndex: 11,
+          transform: `rotate(-6deg)`,
+          transformOrigin: 'right top',
+          display: { xs: 'none', md: 'block' },
+        }}
+      >
+        <Typography
           sx={{
-            position: 'absolute',
-            right: s(48),
-            top: s(64),
-            transform: `rotate(-6deg) scale(${scale})`,
-            transformOrigin: 'right top',
+            fontSize: s(26),
+            color: '#FFFFFF',
+            fontFamily: '"Brush Script MT", "Comic Sans MS", cursive',
+            fontStyle: 'italic',
+            lineHeight: 1,
+            whiteSpace: 'nowrap',
+            borderBottom: '2px solid rgba(0, 170, 255, 0.8)',
+            paddingBottom: s(3),
+            textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
           }}
         >
-          <Typography
-            sx={{
-              fontSize: s(36),
-              color: '#FFFFFF',
-              fontFamily: '"Brush Script MT", "Comic Sans MS", cursive',
-              fontStyle: 'italic',
-              lineHeight: 1,
-              whiteSpace: 'nowrap',
-              borderBottom: `2px solid rgba(0, 170, 255, 0.8)`,
-              paddingBottom: s(4),
-              textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
-            }}
-          >
-            让每一次连接都更自由
-          </Typography>
-        </Box>
+          让每一次连接都更自由
+        </Typography>
       </Box>
     </Box>
   )
