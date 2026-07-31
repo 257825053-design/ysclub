@@ -54,7 +54,7 @@ fn restore_default_size_if_needed(window: &WebviewWindow) {
 #[cfg(target_os = "windows")]
 pub fn apply_dwm_window_style(window: &WebviewWindow) {
     use windows_sys::Win32::Graphics::Dwm::{DwmGetColorizationColor, DwmSetWindowAttribute};
-    use tauri::raw_window_handle::{HasWindowHandle, RawWindowHandle};
+    use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 
     // DWM 窗口属性常量
     const DWMWA_USE_IMMERSIVE_DARK_MODE: u32 = 20;
