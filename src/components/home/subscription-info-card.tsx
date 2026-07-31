@@ -75,7 +75,11 @@ const SubscriptionInfoCard = memo(() => {
         position: 'relative',
         p: 1.5,
         borderRadius: 2.5,
-        background: '#FFFFFF',
+        backgroundImage: "url('/images/subscription-bg.png')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'right center',
+        backgroundRepeat: 'no-repeat',
+        backgroundColor: '#FFFFFF',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
         display: 'flex',
         flexDirection: 'column',
@@ -83,21 +87,6 @@ const SubscriptionInfoCard = memo(() => {
         overflow: 'hidden',
       }}
     >
-      {/* 右侧浅蓝色世界地图水印 */}
-      <Box
-        sx={{
-          position: 'absolute',
-          right: -20,
-          bottom: -20,
-          width: 160,
-          height: 160,
-          opacity: 0.06,
-          background: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='90' fill='none' stroke='%232176F4' stroke-width='2'/%3E%3Cellipse cx='100' cy='100' rx='90' ry='40' fill='none' stroke='%232176F4' stroke-width='1'/%3E%3Cellipse cx='100' cy='100' rx='90' ry='70' fill='none' stroke='%232176F4' stroke-width='1'/%3E%3Cline x1='10' y1='100' x2='190' y2='100' stroke='%232176F4' stroke-width='1'/%3E%3Cline x1='100' y1='10' x2='100' y2='190' stroke='%232176F4' stroke-width='1'/%3E%3C/svg%3E") center/contain no-repeat`,
-          pointerEvents: 'none',
-          zIndex: 0,
-        }}
-      />
-
       {/* 头部：应用图标 + 节点名 + 标签 + 波形 + 按钮 */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

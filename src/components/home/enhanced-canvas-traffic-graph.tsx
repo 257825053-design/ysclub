@@ -56,10 +56,10 @@ const LINE_WIDTH_DOWN = 2.5
 const LINE_WIDTH_GRID = 0.5
 const ALPHA_GRADIENT = 0.15 // 降低渐变透明度
 const ALPHA_LINE = 0.9
-const PADDING_TOP = 16
-const PADDING_RIGHT = 16 // 增加右边距确保时间戳完整显示
-const PADDING_BOTTOM = 32 // 进一步增加底部空间给时间轴和统计信息
-const PADDING_LEFT = 35 // 增加左边距为Y轴标签留出空间
+const PADDING_TOP = 24 // 增大顶部边距，提升绘图区域空间
+const PADDING_RIGHT = 20 // 增大右边距
+const PADDING_BOTTOM = 38 // 增大底部空间给时间轴和统计信息
+const PADDING_LEFT = 40 // 增大左边距为Y轴标签留出更多空间
 
 const GRAPH_CONFIG = {
   maxPoints: MAX_POINTS,
@@ -550,27 +550,27 @@ export const EnhancedCanvasTrafficGraph = memo(
     const getTimeDisplayStrategy = useCallback(
       (timeRangeMinutes: TimeRange) => {
         switch (timeRangeMinutes) {
-          case 1: // 1分钟：更密集的时间标签，显示 MM:SS
+          case 1: // 1分钟：更稀疏的时间标签，显示 MM:SS
             return {
-              maxLabels: 6, // 减少到6个，更适合短时间
+              maxLabels: 4, // 减少到4个，让波形更舒展
               formatTime: formatTrafficMinuteSecond,
-              intervalSeconds: 10, // 每10秒一个标签，更合理
-              minPixelDistance: 35, // 减少间距，允许更多标签
+              intervalSeconds: 15, // 每15秒一个标签
+              minPixelDistance: 60, // 增大间距，让标签更分散
             }
           case 5: // 5分钟：中等密度，显示 HH:MM
             return {
-              maxLabels: 6, // 6个标签比较合适
+              maxLabels: 4, // 4个标签，更大气宽松
               formatTime: formatTrafficHourMinute,
-              intervalSeconds: 30, // 约30秒间隔
-              minPixelDistance: 38, // 减少间距，允许更多标签
+              intervalSeconds: 60, // 约60秒间隔
+              minPixelDistance: 65, // 增大间距
             }
           case 10: // 10分钟：标准密度，显示 HH:MM
           default:
             return {
-              maxLabels: 8, // 保持8个
+              maxLabels: 5, // 减少到5个，让波形线条舒展分散
               formatTime: formatTrafficHourMinute,
-              intervalSeconds: 60, // 1分钟间隔
-              minPixelDistance: 40, // 减少间距，允许更多标签
+              intervalSeconds: 120, // 2分钟间隔
+              minPixelDistance: 70, // 增大间距，整体更大气
             }
         }
       },
@@ -689,7 +689,7 @@ export const EnhancedCanvasTrafficGraph = memo(
         ctx.globalAlpha = 0.7
 
         // 水平网格线
-        const horizontalLines = 4
+        const horizontalLines = 3
         for (let i = 1; i <= horizontalLines; i++) {
           const y = padding.top + (effectiveHeight / (horizontalLines + 1)) * i
           ctx.beginPath()
@@ -699,7 +699,7 @@ export const EnhancedCanvasTrafficGraph = memo(
         }
 
         // 垂直网格线
-        const verticalLines = 6
+        const verticalLines = 4
         for (let i = 1; i <= verticalLines; i++) {
           const x = padding.left + (effectiveWidth / (verticalLines + 1)) * i
           ctx.beginPath()
@@ -806,13 +806,13 @@ export const EnhancedCanvasTrafficGraph = memo(
 
         ctx.stroke()
 
-        // 绘制圆点采样节点
-        const pointInterval = Math.max(1, Math.floor(data.length / 20))
+        // 绘制圆点采样节点（减少数量，让线条更干净舒展）
+        const pointInterval = Math.max(1, Math.floor(data.length / 12))
         ctx.fillStyle = color
         ctx.globalAlpha = GRAPH_CONFIG.alpha.line
         for (let i = 0; i < data.length; i += pointInterval) {
           ctx.beginPath()
-          ctx.arc(getX(i), getY(i), 1.5, 0, Math.PI * 2)
+          ctx.arc(getX(i), getY(i), 1.2, 0, Math.PI * 2)
           ctx.fill()
         }
 

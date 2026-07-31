@@ -1,38 +1,14 @@
-import { Button } from '@mui/material'
-import { useRef } from 'react'
-import { useTranslation } from 'react-i18next'
-
-import { DialogRef } from '@/components/base'
-import { useUpdate } from '@/hooks/use-update'
-
-import { UpdateViewer } from '../setting/mods/update-viewer'
-
+/**
+ * UpdateButton - 更新按钮组件
+ *
+ * 更新功能已彻底禁用，此组件永远不渲染任何内容。
+ * 保留组件导出以兼容现有引用，避免编译错误。
+ */
 interface Props {
   className?: string
 }
 
-export const UpdateButton = (props: Props) => {
-  const { className } = props
-  const { t } = useTranslation()
-  const viewerRef = useRef<DialogRef>(null)
-
-  const { updateInfo } = useUpdate()
-
-  if (!updateInfo?.available) return null
-
-  return (
-    <>
-      <UpdateViewer ref={viewerRef} />
-
-      <Button
-        color="error"
-        variant="contained"
-        size="small"
-        className={className}
-        onClick={() => viewerRef.current?.open()}
-      >
-        {t('shared.actions.new')}
-      </Button>
-    </>
-  )
+export const UpdateButton = (_props: Props) => {
+  // 更新功能已禁用，永远返回 null
+  return null
 }

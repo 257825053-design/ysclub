@@ -54,7 +54,7 @@ const HomePage = () => {
         >
           {/* 第一区域：Banner 横幅 */}
           <Box sx={{ flexShrink: 0, width: '100%' }}>
-            <HeroBanner backgroundImage="url('/images/hero-banner.png')" />
+            <HeroBanner />
           </Box>
 
           {/* 第二区域：第一行卡片组 - 订阅信息 + 快速连接 */}

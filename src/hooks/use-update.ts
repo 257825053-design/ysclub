@@ -19,29 +19,30 @@ export const updateLastCheckTime = (timestamp?: number): number => {
 
 // --- useUpdate hook ---
 
-export const useUpdate = (enabled: boolean = true) => {
-  // 更新检测功能已禁用，永远返回无更新状态
-  // 预留接口：未来需要启用更新检测时，将 shouldCheck 改回原始逻辑即可
-  const shouldCheck = false
+export const useUpdate = (_enabled: boolean = true) => {
+  // ===== 更新检测功能已彻底禁用，锁定当前版本 =====
+  // 用户升级只能通过站外网站下载安装包
+  // 预留接口：未来需要启用更新检测时，恢复以下注释代码即可
 
-  const {
-    data: updateInfo,
-    refetch: checkUpdate,
-    isFetching: isValidating,
-  } = useQuery({
-    queryKey: ['checkUpdate'],
-    queryFn: async () => {
-      const result = await checkUpdateSafe()
-      updateLastCheckTime()
-      return result
-    },
-    enabled: shouldCheck,
-    retry: 2,
-    staleTime: 60 * 60 * 1000,
-    refetchInterval: 24 * 60 * 60 * 1000,
-    refetchIntervalInBackground: false,
-    refetchOnWindowFocus: false,
-  })
+  // const shouldCheck = false
+  // const {
+  //   data: updateInfo,
+  //   refetch: checkUpdate,
+  //   isFetching: isValidating,
+  // } = useQuery({
+  //   queryKey: ['checkUpdate'],
+  //   queryFn: async () => {
+  //     const result = await checkUpdateSafe()
+  //     updateLastCheckTime()
+  //     return result
+  //   },
+  //   enabled: shouldCheck,
+  //   retry: 2,
+  //   staleTime: 60 * 60 * 1000,
+  //   refetchInterval: 24 * 60 * 60 * 1000,
+  //   refetchIntervalInBackground: false,
+  //   refetchOnWindowFocus: false,
+  // })
 
   // Shared last check timestamp
   const { data: lastCheckUpdate } = useQuery({
@@ -52,9 +53,9 @@ export const useUpdate = (enabled: boolean = true) => {
   })
 
   return {
-    updateInfo,
-    checkUpdate,
-    loading: isValidating,
+    updateInfo: null as any,
+    checkUpdate: async () => null,
+    loading: false,
     lastCheckUpdate: lastCheckUpdate ?? null,
   }
 }

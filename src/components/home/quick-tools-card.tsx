@@ -46,7 +46,7 @@ const QuickToolsCard = memo(() => {
       icon: <DataUsageOutlined sx={{ fontSize: 20 }} />,
       label: '流量统计',
       subtitle: '查看使用情况',
-      path: '/logs',
+      path: '/connection',
       color: '#F59E0B',
       external: false,
     },
