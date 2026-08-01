@@ -53,6 +53,7 @@ fn restore_default_size_if_needed(window: &WebviewWindow) {
 /// 将边框和标题栏颜色固定为该色，使窗口在激活和失焦状态下保持一致的蓝色。
 #[cfg(target_os = "windows")]
 pub fn apply_dwm_window_style(window: &WebviewWindow) {
+    use windows_sys::Win32::Foundation::HWND;
     use windows_sys::Win32::Graphics::Dwm::{DwmGetColorizationColor, DwmSetWindowAttribute};
     use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 
@@ -84,8 +85,9 @@ pub fn apply_dwm_window_style(window: &WebviewWindow) {
         Err(_) => return,
     };
 
-    let hwnd: isize = match handle.as_raw() {
-        RawWindowHandle::Win32(h) => h.hwnd.get() as isize,
+    // windows-sys 0.61.2 中 HWND = *mut c_void，需要将 isize 转为裸指针
+    let hwnd: HWND = match handle.as_raw() {
+        RawWindowHandle::Win32(h) => h.hwnd.get() as *mut core::ffi::c_void,
         _ => return,
     };
 
