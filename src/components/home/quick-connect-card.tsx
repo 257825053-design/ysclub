@@ -1,12 +1,24 @@
 import { Box, Button, MenuItem, Select, Typography, SvgIcon } from '@mui/material'
 import { BoltOutlined, CheckCircleOutlined, FiberManualRecord } from '@mui/icons-material'
-import { memo, useMemo, useState } from 'react'
-import { useLockFn } from 'ahooks'
+import { memo, useCallback, useMemo, useState } from 'react'
 
 import { useProxiesData, useCoreDataStatus, useSystemData, useAppRefreshers } from '@/providers/app-data-context'
 import { useVerge } from '@/hooks/use-verge'
 import { showNotice } from '@/services/notice-service'
 import iconDark from '@/assets/image/icon_dark.svg?react'
+
+/** 带超时的 Promise 包装，防止 IPC 调用永久挂起导致按钮锁定 */
+function withTimeout<T>(promise: Promise<T>, ms: number, label = '操作'): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`${label}超时，请稍后重试`))
+    }, ms)
+    promise.then(
+      (val) => { clearTimeout(timer); resolve(val) },
+      (err) => { clearTimeout(timer); reject(err) },
+    )
+  })
+}
 
 /**
  * QuickConnectCard - 快速连接卡片（简化版）
@@ -21,17 +33,22 @@ import iconDark from '@/assets/image/icon_dark.svg?react'
  * 交互逻辑：
  * - 与左侧电源按钮双向联动
  * - 断开时按钮文字「连接」，连接后变「已连接」
+ * - 使用 isConnected（实际系统代理状态）作为切换依据，避免配置状态与实际状态不同步
+ * - 手动 loading 状态 + 超时保护，防止 useLockFn 在 IPC 挂起时永久锁定
  */
 const QuickConnectCard = memo(() => {
   const { proxyView } = useProxiesData()
   const { isCoreDataPending } = useCoreDataStatus()
-  const { sysproxy, runningMode } = useSystemData()
+  const { sysproxy } = useSystemData()
   const { verge, patchVerge } = useVerge()
   const { refreshSysproxy, refreshAll } = useAppRefreshers()
 
   const [selectedGroupName, setSelectedGroupName] = useState<string>('')
+  const [toggling, setToggling] = useState(false)
 
-  const isConnected = sysproxy?.enable || runningMode === 'Service'
+  // 使用实际代理状态判断连接：系统代理或 TUN 模式任一启用即为已连接
+  // 不使用 runningMode === 'Service'，因为 Service 模式仅表示核心以服务方式运行，不代表代理已启用
+  const isConnected = sysproxy?.enable || verge?.enable_tun_mode || false
 
   const groups = proxyView?.groups?.filter(
     (g) => !g.hidden && (g.type === 'Selector' || g.type === 'URLTest'),
@@ -56,17 +73,34 @@ const QuickConnectCard = memo(() => {
     return typeof delay === 'number' && delay > 0 ? delay : null
   }, [currentGroup, proxyView])
 
-  // 连接/断开切换 - 与电源按钮联动
-  const handleToggleConnect = useLockFn(async () => {
+  // 连接/断开切换 - 根据实际活跃的代理模式进行切换
+  const handleToggleConnect = useCallback(async () => {
+    if (toggling) return
+    setToggling(true)
     try {
-      const currentEnable = verge?.enable_system_proxy ?? false
-      await patchVerge({ enable_system_proxy: !currentEnable })
-      await refreshSysproxy()
-      await refreshAll()
+      if (isConnected) {
+        // 断开：禁用当前活跃的代理模式（系统代理和/或 TUN 模式）
+        const patch: Partial<IVergeConfig> = {}
+        if (sysproxy?.enable) patch.enable_system_proxy = false
+        if (verge?.enable_tun_mode) patch.enable_tun_mode = false
+        await withTimeout(patchVerge(patch), 15000, '断开连接')
+      } else {
+        // 连接：默认使用系统代理模式
+        await withTimeout(
+          patchVerge({ enable_system_proxy: true }),
+          15000,
+          '建立连接',
+        )
+      }
+      // 刷新操作不阻塞按钮释放，后台异步执行
+      refreshSysproxy().catch(() => {})
+      refreshAll().catch(() => {})
     } catch (error) {
       showNotice.error(error)
+    } finally {
+      setToggling(false)
     }
-  })
+  }, [toggling, isConnected, sysproxy, verge, patchVerge, refreshSysproxy, refreshAll])
 
   return (
     <Box
@@ -215,7 +249,7 @@ const QuickConnectCard = memo(() => {
       <Button
         variant="contained"
         fullWidth
-        disabled={isCoreDataPending}
+        disabled={isCoreDataPending || toggling}
         onClick={handleToggleConnect}
         startIcon={isConnected ? <CheckCircleOutlined /> : <BoltOutlined />}
         sx={{
@@ -241,7 +275,7 @@ const QuickConnectCard = memo(() => {
           },
         }}
       >
-        {isConnected ? '已连接' : '连接'}
+        {toggling ? '处理中...' : isConnected ? '已连接' : '连接'}
       </Button>
     </Box>
   )

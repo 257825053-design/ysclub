@@ -2,7 +2,6 @@ import { Box, Typography } from '@mui/material'
 import { PowerSettingsNewOutlined } from '@mui/icons-material'
 import { memo, useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLockFn } from 'ahooks'
 
 import { useSystemData, useAppRefreshers } from '@/providers/app-data-context'
 import { useUptimeData } from '@/providers/app-data-context'
@@ -14,6 +13,19 @@ const formatUptime = (seconds: number) => {
   const m = Math.floor((seconds % 3600) / 60)
   const s = seconds % 60
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
+/** 带超时的 Promise 包装，防止 IPC 调用永久挂起导致按钮锁定 */
+function withTimeout<T>(promise: Promise<T>, ms: number, label = '操作'): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`${label}超时，请稍后重试`))
+    }, ms)
+    promise.then(
+      (val) => { clearTimeout(timer); resolve(val) },
+      (err) => { clearTimeout(timer); reject(err) },
+    )
+  })
 }
 
 /**
@@ -29,19 +41,24 @@ const formatUptime = (seconds: number) => {
  * - 电源按钮可点击，切换代理启停
  * - 与右侧快速连接按钮双向联动
  * - 断开时计时器显示 01:00:00，连接后从 00:00:00 开始正向计时
+ * - 使用 isConnected（实际系统代理状态）作为切换依据
+ * - 手动 loading 状态 + 超时保护，防止 IPC 挂起时永久锁定
  */
 const ConnectionPanel = memo(() => {
   const { t } = useTranslation()
-  const { sysproxy, runningMode } = useSystemData()
+  const { sysproxy } = useSystemData()
   const { uptime } = useUptimeData()
   const { verge, patchVerge } = useVerge()
   const { refreshSysproxy, refreshAll } = useAppRefreshers()
 
-  const isConnected = sysproxy?.enable || runningMode === 'Service'
+  // 使用实际代理状态判断连接：系统代理或 TUN 模式任一启用即为已连接
+  // 不使用 runningMode === 'Service'，因为 Service 模式仅表示核心以服务方式运行，不代表代理已启用
+  const isConnected = sysproxy?.enable || verge?.enable_tun_mode || false
 
   // ========== 连接计时器逻辑 ==========
   const [connectTimer, setConnectTimer] = useState(0)
   const [hasConnected, setHasConnected] = useState(false)
+  const [toggling, setToggling] = useState(false)
   const prevConnectedRef = useRef(isConnected)
 
   useEffect(() => {
@@ -67,17 +84,34 @@ const ConnectionPanel = memo(() => {
     ? '01:00:00'
     : formatUptime(connectTimer)
 
-  // ========== 电源按钮点击 ==========
-  const handleToggleProxy = useLockFn(async () => {
+  // ========== 电源按钮点击 - 根据实际活跃的代理模式进行切换 ==========
+  const handleToggleProxy = useCallback(async () => {
+    if (toggling) return
+    setToggling(true)
     try {
-      const currentEnable = verge?.enable_system_proxy ?? false
-      await patchVerge({ enable_system_proxy: !currentEnable })
-      await refreshSysproxy()
-      await refreshAll()
+      if (isConnected) {
+        // 断开：禁用当前活跃的代理模式（系统代理和/或 TUN 模式）
+        const patch: Partial<IVergeConfig> = {}
+        if (sysproxy?.enable) patch.enable_system_proxy = false
+        if (verge?.enable_tun_mode) patch.enable_tun_mode = false
+        await withTimeout(patchVerge(patch), 15000, '断开连接')
+      } else {
+        // 连接：默认使用系统代理模式
+        await withTimeout(
+          patchVerge({ enable_system_proxy: true }),
+          15000,
+          '建立连接',
+        )
+      }
+      // 刷新操作不阻塞按钮释放，后台异步执行
+      refreshSysproxy().catch(() => {})
+      refreshAll().catch(() => {})
     } catch (error) {
       showNotice.error(error)
+    } finally {
+      setToggling(false)
     }
-  })
+  }, [toggling, isConnected, sysproxy, verge, patchVerge, refreshSysproxy, refreshAll])
 
   return (
     <Box
@@ -130,27 +164,28 @@ const ConnectionPanel = memo(() => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          cursor: 'pointer',
+          cursor: toggling ? 'wait' : 'pointer',
           transition: 'all 0.3s ease',
+          opacity: toggling ? 0.7 : 1,
           background: isConnected
             ? 'linear-gradient(135deg, #2378F5 0%, #4F46E5 100%)'
             : 'linear-gradient(135deg, #334155 0%, #1e293b 100%)',
           boxShadow: isConnected
             ? '0 0 24px rgba(35, 120, 245, 0.4), 0 0 48px rgba(35, 120, 245, 0.15)'
             : '0 2px 12px rgba(0, 0, 0, 0.3)',
-          '&:hover': {
+          '&:hover': toggling ? {} : {
             transform: 'scale(1.08)',
             boxShadow: isConnected
               ? '0 0 32px rgba(35, 120, 245, 0.55), 0 0 64px rgba(35, 120, 245, 0.25)'
               : '0 4px 16px rgba(0, 0, 0, 0.4)',
           },
-          '&:active': {
+          '&:active': toggling ? {} : {
             transform: 'scale(0.95)',
           },
         }}
       >
         {/* 外圈光晕 */}
-        {isConnected && (
+        {isConnected && !toggling && (
           <Box
             sx={{
               position: 'absolute',

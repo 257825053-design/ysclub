@@ -6,6 +6,7 @@ import dayjs from 'dayjs'
 import { useNavigate } from 'react-router'
 
 import { useProfiles } from '@/hooks/use-profiles'
+import { useVerge } from '@/hooks/use-verge'
 import { useSystemData } from '@/providers/app-data-context'
 import parseTraffic from '@/utils/parse-traffic'
 import iconDark from '@/assets/image/icon_dark.svg?react'
@@ -35,9 +36,11 @@ const SubscriptionInfoCard = memo(() => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { current } = useProfiles()
-  const { sysproxy, runningMode } = useSystemData()
+  const { sysproxy } = useSystemData()
+  const { verge } = useVerge()
 
-  const isConnected = sysproxy?.enable || runningMode === 'Service'
+  // 使用实际代理状态判断连接：系统代理或 TUN 模式任一启用即为已连接
+  const isConnected = sysproxy?.enable || verge?.enable_tun_mode || false
 
   // ========== 动态数据 ==========
   const serverHost = useMemo(() => extractHostname(current?.url), [current?.url])
