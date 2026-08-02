@@ -14,12 +14,42 @@ const LIGHT_BACKGROUND_COLOR: Color = Color(245, 245, 245, 255); // #F5F5F5
 const DARK_BACKGROUND_HEX: &str = "#0B101C";
 const LIGHT_BACKGROUND_HEX: &str = "#F5F5F5";
 
-// 定义默认窗口尺寸常量
+// 定义默认窗口尺寸常量（仅作为无法获取屏幕信息时的后备值）
 const DEFAULT_WIDTH: f64 = 940.0;
 const DEFAULT_HEIGHT: f64 = 700.0;
 
 const MINIMAL_WIDTH: f64 = 520.0;
 const MINIMAL_HEIGHT: f64 = 520.0;
+
+// 自适应窗口尺寸的上下限
+const MAX_ADAPTIVE_WIDTH: f64 = 1180.0;
+const MAX_ADAPTIVE_HEIGHT: f64 = 860.0;
+
+/// 根据主屏幕的逻辑分辨率计算自适应窗口尺寸
+///
+/// Tauri 的 `inner_size` 使用逻辑像素（CSS px），与 DPI 无关。
+/// `primary_monitor().size()` 返回物理像素，需除以 `scale_factor` 转换为逻辑像素。
+///
+/// 策略：窗口高度 ≈ 屏幕逻辑高度的 78%，宽度 ≈ 56%，
+/// 并限制在 `[MINIMAL_*, MAX_ADAPTIVE_*]` 范围内，
+/// 确保在任何分辨率下窗口既不会过大也不会过小。
+fn compute_adaptive_window_size(app_handle: &tauri::AppHandle) -> (f64, f64) {
+    let (mut width, mut height) = (DEFAULT_WIDTH, DEFAULT_HEIGHT);
+
+    if let Ok(Some(monitor)) = app_handle.primary_monitor() {
+        let scale = monitor.scale_factor();
+        let phys = monitor.size();
+        // 物理像素 → 逻辑像素
+        let logical_w = phys.width as f64 / scale;
+        let logical_h = phys.height as f64 / scale;
+
+        // 窗口占屏幕的比例：高度 78%，宽度 56%
+        width = (logical_w * 0.56).clamp(MINIMAL_WIDTH, MAX_ADAPTIVE_WIDTH);
+        height = (logical_h * 0.78).clamp(MINIMAL_HEIGHT, MAX_ADAPTIVE_HEIGHT);
+    }
+
+    (width, height)
+}
 
 #[cfg(target_os = "linux")]
 const DEFAULT_DECORATIONS: bool = false;
@@ -39,9 +69,12 @@ fn restore_default_size_if_needed(window: &WebviewWindow) {
         return;
     }
 
+    // 窗口尺寸过小时，按自适应逻辑重新计算
+    let app_handle = window.app_handle();
+    let (w, h) = compute_adaptive_window_size(app_handle);
     logging_error!(
         Type::Window,
-        window.set_size(tauri::LogicalSize::new(DEFAULT_WIDTH, DEFAULT_HEIGHT))
+        window.set_size(tauri::LogicalSize::new(w, h))
     );
     logging_error!(Type::Window, window.center());
 }
@@ -152,6 +185,9 @@ pub async fn build_new_window() -> Result<WebviewWindow, String> {
 
     let initial_script = build_window_initial_script(initial_theme_mode, DARK_BACKGROUND_HEX, LIGHT_BACKGROUND_HEX);
 
+    // 根据主屏幕分辨率计算自适应窗口尺寸
+    let (adapted_width, adapted_height) = compute_adaptive_window_size(app_handle);
+
     let mut builder = tauri::WebviewWindowBuilder::new(
         app_handle,
         "main", /* the unique window label */
@@ -161,7 +197,7 @@ pub async fn build_new_window() -> Result<WebviewWindow, String> {
     .center()
     .decorations(DEFAULT_DECORATIONS)
     .fullscreen(false)
-    .inner_size(DEFAULT_WIDTH, DEFAULT_HEIGHT)
+    .inner_size(adapted_width, adapted_height)
     .min_inner_size(MINIMAL_WIDTH, MINIMAL_HEIGHT)
     .visible(false) // 等待主题色准备好后再展示，避免启动色差
     .initialization_script(&initial_script)

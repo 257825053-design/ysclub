@@ -31,6 +31,7 @@ body {
   --glass-bg: rgba(15, 22, 38, 0.85);
   --nav-width: 240px;
   --success-color: #36D399;
+  --ui-scale: 1; /* 首页内容自适应缩放系数，由 useViewportScale 动态设置 */
 }
 
 ::selection {

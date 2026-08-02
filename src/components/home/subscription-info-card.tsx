@@ -129,7 +129,7 @@ const SubscriptionInfoCard = memo(() => {
           variant="outlined"
           startIcon={<ListAltOutlined sx={{ fontSize: 14 }} />}
           endIcon={<MenuOutlined sx={{ fontSize: 14 }} />}
-          onClick={() => navigate('/profiles')}
+          onClick={() => navigate('/profile')}
           sx={{
             borderRadius: 1.5,
             textTransform: 'none',

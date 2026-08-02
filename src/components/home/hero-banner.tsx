@@ -31,8 +31,15 @@ const HeroBanner = memo(() => {
 
     const updateScale = () => {
       const height = container.clientHeight
+      // 读取外层 zoom 缩放系数（由 useViewportScale 设置），消除双重缩放
+      const uiScaleStr = getComputedStyle(document.documentElement)
+        .getPropertyValue('--ui-scale')
+        .trim()
+      const uiScale = parseFloat(uiScaleStr) || 1
+      // 将 zoom 后的实测高度还原为设计高度，再计算内部缩放
+      const effectiveHeight = height / uiScale
       // 参考高度 190px → scale=1，120px → scale≈0.63
-      const newScale = Math.max(0.6, Math.min(1, height / 190))
+      const newScale = Math.max(0.6, Math.min(1, effectiveHeight / 190))
       setScale(newScale)
     }
 
