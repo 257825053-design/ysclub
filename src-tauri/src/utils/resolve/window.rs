@@ -15,24 +15,28 @@ const DARK_BACKGROUND_HEX: &str = "#0B101C";
 const LIGHT_BACKGROUND_HEX: &str = "#F5F5F5";
 
 // 定义默认窗口尺寸常量（仅作为无法获取屏幕信息时的后备值）
-const DEFAULT_WIDTH: f64 = 940.0;
-const DEFAULT_HEIGHT: f64 = 700.0;
+// 基准：1920×1080 @ 100% 缩放下，1100×960 可完整展示首页所有卡片
+const DEFAULT_WIDTH: f64 = 1100.0;
+const DEFAULT_HEIGHT: f64 = 960.0;
 
-const MINIMAL_WIDTH: f64 = 520.0;
-const MINIMAL_HEIGHT: f64 = 520.0;
+// 最小窗口尺寸：不低于此值，确保首页所有卡片完整展示
+const MINIMAL_WIDTH: f64 = 1100.0;
+const MINIMAL_HEIGHT: f64 = 960.0;
 
-// 自适应窗口尺寸的上下限
-const MAX_ADAPTIVE_WIDTH: f64 = 1180.0;
-const MAX_ADAPTIVE_HEIGHT: f64 = 860.0;
+// 自适应窗口尺寸的上限（大屏可适当放大，但不超此范围）
+const MAX_ADAPTIVE_WIDTH: f64 = 1400.0;
+const MAX_ADAPTIVE_HEIGHT: f64 = 1080.0;
 
 /// 根据主屏幕的逻辑分辨率计算自适应窗口尺寸
 ///
 /// Tauri 的 `inner_size` 使用逻辑像素（CSS px），与 DPI 无关。
 /// `primary_monitor().size()` 返回物理像素，需除以 `scale_factor` 转换为逻辑像素。
 ///
-/// 策略：窗口高度 ≈ 屏幕逻辑高度的 78%，宽度 ≈ 56%，
-/// 并限制在 `[MINIMAL_*, MAX_ADAPTIVE_*]` 范围内，
-/// 确保在任何分辨率下窗口既不会过大也不会过小。
+/// 策略：
+/// - 基准尺寸 1100×960（逻辑像素），在任何 100% 缩放屏幕上都能完整展示首页
+/// - 若屏幕逻辑分辨率远大于基准（如 2560×1440），则按比例放大，但不超过上限
+/// - 若屏幕逻辑分辨率小于基准，仍使用基准尺寸（由 OS 处理溢出）
+/// - DPI 缩放由 Tauri/OS 自动处理，逻辑像素尺寸不变
 fn compute_adaptive_window_size(app_handle: &tauri::AppHandle) -> (f64, f64) {
     let (mut width, mut height) = (DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
@@ -43,9 +47,15 @@ fn compute_adaptive_window_size(app_handle: &tauri::AppHandle) -> (f64, f64) {
         let logical_w = phys.width as f64 / scale;
         let logical_h = phys.height as f64 / scale;
 
-        // 窗口占屏幕的比例：高度 78%，宽度 56%
-        width = (logical_w * 0.56).clamp(MINIMAL_WIDTH, MAX_ADAPTIVE_WIDTH);
-        height = (logical_h * 0.78).clamp(MINIMAL_HEIGHT, MAX_ADAPTIVE_HEIGHT);
+        // 基准 1100×960，若屏幕逻辑分辨率充足则按比例放大
+        // 宽度比例 = logical_w / 1920，高度比例 = logical_h / 1080
+        // 取较小比例确保窗口不会超出屏幕
+        let ratio_w = logical_w / 1920.0;
+        let ratio_h = logical_h / 1080.0;
+        let ratio = ratio_w.min(ratio_h).min(1.3).max(1.0);
+
+        width = (DEFAULT_WIDTH * ratio).clamp(DEFAULT_WIDTH, MAX_ADAPTIVE_WIDTH);
+        height = (DEFAULT_HEIGHT * ratio).clamp(DEFAULT_HEIGHT, MAX_ADAPTIVE_HEIGHT);
     }
 
     (width, height)

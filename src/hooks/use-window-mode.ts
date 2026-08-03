@@ -5,13 +5,15 @@ import { useEffect, useState } from 'react'
  *
  * 根据窗口实际可用高度自动选择 UI 密度模式：
  *
- * - compact（紧凑模式）：< 620px 可用高度
+ * 基准窗口 1100×960，可用高度 = 960 - 36 - 48 = 876px → spacious 模式
+ *
+ * - compact（紧凑模式）：< 700px 可用高度
  *   隐藏副标题、辅助文字，卡片间距缩小，保留核心功能
  *
- * - standard（标准模式）：620-760px 可用高度
+ * - standard（标准模式）：700-850px 可用高度
  *   完整显示所有卡片，标准间距
  *
- * - spacious（宽敞模式）：> 760px 可用高度
+ * - spacious（宽敞模式）：> 850px 可用高度
  *   所有内容完整展示，间距更大，体验最佳
  *
  * 同时提供可用宽高供组件做精细判断。
@@ -43,9 +45,9 @@ function computeMode(): WindowModeInfo {
   const availableWidth = viewportWidth
 
   let mode: WindowMode = 'standard'
-  if (availableHeight < 620) {
+  if (availableHeight < 700) {
     mode = 'compact'
-  } else if (availableHeight > 760) {
+  } else if (availableHeight > 850) {
     mode = 'spacious'
   }
 

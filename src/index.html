@@ -40,7 +40,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding-bottom: calc(8vh + 50px);
+        padding-bottom: 4vh;
         overflow: hidden;
       }
 
@@ -49,19 +49,14 @@
         pointer-events: none;
       }
 
-      #initial-loading-overlay .startup-bg {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        z-index: 0;
-      }
-
       #initial-loading-overlay .startup-bg-fallback {
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, #080F24 0%, #0F1A35 50%, #080F24 100%);
+        background-image: url('/images/startup-bg.png');
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-color: #080F24;
         z-index: 0;
       }
 
@@ -626,7 +621,6 @@
   <body>
     <div id="initial-loading-overlay">
       <div class="startup-bg-fallback"></div>
-      <img class="startup-bg" src="/images/startup-bg.png" alt="" onerror="this.style.display='none'" />
       <div class="startup-content">
         <div class="startup-progress-track">
           <div class="startup-progress-bar" id="startup-progress-bar"></div>

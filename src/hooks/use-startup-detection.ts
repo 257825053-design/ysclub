@@ -13,17 +13,24 @@ import { hideInitialOverlay, updateOverlayProgress } from '@/pages/_layout/utils
  * 4. 等待页面布局稳定，通知 React 重新计算布局
  * 5. 隐藏加载层，展示主界面
  *
- * 关键改进：
- * - 窗口尺寸调整后，主动派发 resize 事件，触发 useWindowMode 重新计算密度模式
- * - 不再使用 --ui-scale CSS 变量做全局缩放，改由 flexbox + useWindowMode 自适应
- * - 等待两帧确保 React 完成重渲染后再隐藏加载层
+ * 窗口尺寸策略：
+ * - 基准 1100×960（逻辑像素），在 1920×1080 @ 100% 缩放下完整展示首页
+ * - 最小不低于 1100×960
+ * - 大屏按比例放大，上限 1400×1080
+ * - DPI 缩放由 Tauri/OS 自动处理
  */
 
-const TITLEBAR_HEIGHT = 36
-const MINIMAL_WIDTH = 520
-const MINIMAL_HEIGHT = 520
-const MAX_ADAPTIVE_WIDTH = 1180
-const MAX_ADAPTIVE_HEIGHT = 860
+// 基准窗口尺寸：1920×1080 @ 100% 缩放下完整展示首页所有卡片
+const BASE_WIDTH = 1100.0
+const BASE_HEIGHT = 960.0
+
+// 最小窗口尺寸（与 Rust 端一致）
+const MIN_WIDTH = 1100.0
+const MIN_HEIGHT = 960.0
+
+// 最大窗口尺寸（大屏上限）
+const MAX_WIDTH = 1400.0
+const MAX_HEIGHT = 1080.0
 
 interface DetectionStep {
   label: string
@@ -94,18 +101,18 @@ export function useStartupDetection(themeReady: boolean) {
         await delay(300)
         if (cancelled) return
 
-        let targetWidth = 940.0
-        let targetHeight = 700.0
+        // 基准 1100×960，大屏按比例放大
+        let targetWidth = BASE_WIDTH
+        let targetHeight = BASE_HEIGHT
 
         if (monitorInfo) {
-          targetWidth = Math.max(
-            MINIMAL_WIDTH,
-            Math.min(MAX_ADAPTIVE_WIDTH, monitorInfo.logicalW * 0.56),
-          )
-          targetHeight = Math.max(
-            MINIMAL_HEIGHT,
-            Math.min(MAX_ADAPTIVE_HEIGHT, monitorInfo.logicalH * 0.78),
-          )
+          const ratioW = monitorInfo.logicalW / 1920.0
+          const ratioH = monitorInfo.logicalH / 1080.0
+          // 大屏按比例放大（上限 1.3x），小屏保持基准 1.0x
+          const ratio = Math.max(1.0, Math.min(ratioW, ratioH, 1.3))
+
+          targetWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, BASE_WIDTH * ratio))
+          targetHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, BASE_HEIGHT * ratio))
         }
 
         // ===== Step 2: 调整窗口大小 =====
