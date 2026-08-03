@@ -85,6 +85,8 @@ const SubscriptionInfoCard = memo(() => {
         flexDirection: 'column',
         gap: 0.75,
         overflow: 'hidden',
+        height: '100%',
+        minHeight: 0,
       }}
     >
       {/* 闪烁蓝点动画样式 */}
@@ -152,8 +154,8 @@ const SubscriptionInfoCard = memo(() => {
         </Button>
       </Box>
 
-      {/* 信息列表 */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, position: 'relative', zIndex: 1 }}>
+      {/* 信息列表 - flex:1 填充剩余空间 */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, position: 'relative', zIndex: 1, flex: 1, minHeight: 0, justifyContent: 'center' }}>
         {[
           { label: '服务器地址', value: serverHost },
           { label: '协议', value: protocol },
@@ -173,7 +175,7 @@ const SubscriptionInfoCard = memo(() => {
       </Box>
 
       {/* 进度条 */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, position: 'relative', zIndex: 1, mt: 0.25 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, position: 'relative', zIndex: 1, mt: 0.25, flexShrink: 0 }}>
         <Typography sx={{ fontSize: 12, color: '#9CA3AF', flexShrink: 0 }}>
           使用进度
         </Typography>

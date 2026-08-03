@@ -42,11 +42,13 @@ const TrafficCard = memo(() => {
         flexDirection: 'column',
         gap: 1,
         minWidth: 0,
+        minHeight: 0,
+        height: '100%',
         overflow: 'hidden',
       }}
     >
       {/* 标题 + 右上角下载/上传图例 */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
           <SvgIcon
             component={iconDark}
@@ -101,11 +103,11 @@ const TrafficCard = memo(() => {
         </Box>
       </Box>
 
-      {/* 流量图 - 固定高度防止布局位移 */}
+      {/* 流量图 - flex:1 自适应高度 */}
       <Box
         sx={{
-          height: 45,
-          flexShrink: 0,
+          flex: 1,
+          minHeight: 30,
           borderRadius: 1.5,
           overflow: 'hidden',
           bgcolor: 'rgba(0, 0, 0, 0.2)',

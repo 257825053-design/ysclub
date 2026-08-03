@@ -5,53 +5,23 @@ import {
   PublicOutlined,
   DevicesOutlined,
 } from '@mui/icons-material'
-import { memo, useEffect, useRef, useState } from 'react'
+import { memo } from 'react'
 
 import iconDark from '@/assets/image/icon_dark.svg?react'
 
 /**
- * HeroBanner - 首页顶部品牌横幅（分层自适应版）
+ * HeroBanner - 首页顶部品牌横幅（纯 CSS 响应式版）
  *
  * 架构：背景图底层（z-index:1）+ 渐变遮罩层（z-index:2）+ 悬浮文字内容层（z-index:10）
  *
- * 自适应策略：
- * 1. 容器高度 120-200px，通过 ResizeObserver 监听高度变化
- * 2. 以 190px 为基准高度计算 scale（0.6~1.0），所有尺寸按 scale 等比缩放
- * 3. 内容使用 flexbox 垂直居中，确保任何高度下文字都在容器内
- * 4. 右侧手写标语在窄屏（<900px）时隐藏，避免与左侧文字重叠
+ * 响应式策略：
+ * 1. 容器高度通过 MUI 断点自适应（120-190px）
+ * 2. 所有文字尺寸通过断点自适应，不依赖 JS 缩放
+ * 3. 内容使用 flexbox 垂直居中
+ * 4. 右侧手写标语在窄屏（<900px）时隐藏
  * 5. 底部功能标签在极窄屏（<600px）时隐藏
  */
 const HeroBanner = memo(() => {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [scale, setScale] = useState(1)
-
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-
-    const updateScale = () => {
-      const height = container.clientHeight
-      // 读取外层 zoom 缩放系数（由 useViewportScale 设置），消除双重缩放
-      const uiScaleStr = getComputedStyle(document.documentElement)
-        .getPropertyValue('--ui-scale')
-        .trim()
-      const uiScale = parseFloat(uiScaleStr) || 1
-      // 将 zoom 后的实测高度还原为设计高度，再计算内部缩放
-      const effectiveHeight = height / uiScale
-      // 参考高度 190px → scale=1，120px → scale≈0.63
-      const newScale = Math.max(0.6, Math.min(1, effectiveHeight / 190))
-      setScale(newScale)
-    }
-
-    updateScale()
-    const observer = new ResizeObserver(updateScale)
-    observer.observe(container)
-    return () => observer.disconnect()
-  }, [])
-
-  // 缩放辅助函数
-  const s = (value: number) => `${value * scale}px`
-
   // 功能标签数据
   const featureTags = [
     { Icon: ShieldOutlined, title: '银行级加密', subtitle: '全程守护' },
@@ -62,12 +32,11 @@ const HeroBanner = memo(() => {
 
   return (
     <Box
-      ref={containerRef}
       sx={{
         position: 'relative',
         width: '100%',
-        height: { xs: 120, sm: 140, md: 160, lg: 175, xl: 190 },
-        minHeight: 120,
+        height: { xs: 110, sm: 130, md: 150, lg: 170, xl: 185 },
+        minHeight: 100,
         maxHeight: 200,
         borderRadius: 2,
         overflow: 'hidden',
@@ -120,8 +89,8 @@ const HeroBanner = memo(() => {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          pl: s(32),
-          pr: s(32),
+          pl: { xs: 1.5, sm: 2, md: 2.5, lg: 3 },
+          pr: { xs: 1.5, sm: 2, md: 2.5, lg: 3 },
           overflow: 'hidden',
         }}
       >
@@ -130,15 +99,15 @@ const HeroBanner = memo(() => {
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: s(10),
-            mb: s(6),
+            gap: { xs: 0.5, sm: 0.75, md: 1 },
+            mb: { xs: 0.25, sm: 0.5, md: 0.5 },
           }}
         >
           <SvgIcon
             component={iconDark}
             sx={{
-              width: s(20),
-              height: s(20),
+              width: { xs: 16, sm: 18, md: 20 },
+              height: { xs: 16, sm: 18, md: 20 },
               flexShrink: 0,
               filter: 'drop-shadow(0 0 4px rgba(0, 170, 255, 0.6))',
             }}
@@ -146,7 +115,7 @@ const HeroBanner = memo(() => {
           />
           <Typography
             sx={{
-              fontSize: s(20),
+              fontSize: { xs: 15, sm: 17, md: 19, lg: 20 },
               fontWeight: 600,
               color: '#FFFFFF',
               lineHeight: 1,
@@ -157,7 +126,7 @@ const HeroBanner = memo(() => {
           </Typography>
           <Typography
             sx={{
-              fontSize: s(20),
+              fontSize: { xs: 15, sm: 17, md: 19, lg: 20 },
               color: '#FFFFFF',
               opacity: 0.4,
               lineHeight: 1,
@@ -167,7 +136,7 @@ const HeroBanner = memo(() => {
           </Typography>
           <Typography
             sx={{
-              fontSize: s(16),
+              fontSize: { xs: 11, sm: 13, md: 14, lg: 15 },
               color: '#FFFFFF',
               opacity: 0.85,
               lineHeight: 1,
@@ -181,7 +150,7 @@ const HeroBanner = memo(() => {
         {/* 第二层：主标题（蓝色外发光） */}
         <Typography
           sx={{
-            fontSize: s(40),
+            fontSize: { xs: 22, sm: 28, md: 32, lg: 36, xl: 40 },
             fontWeight: 700,
             color: '#FFFFFF',
             lineHeight: 1.1,
@@ -196,12 +165,12 @@ const HeroBanner = memo(() => {
         {/* 第三层：副标题 */}
         <Typography
           sx={{
-            fontSize: s(15),
+            fontSize: { xs: 10, sm: 12, md: 13, lg: 14, xl: 15 },
             color: '#FFFFFF',
             opacity: 0.8,
             lineHeight: 1,
             whiteSpace: 'nowrap',
-            mt: s(4),
+            mt: { xs: 0.25, sm: 0.5, md: 0.5 },
           }}
         >
           更快·更稳定·更安全的专业级全球网络代理服务
@@ -211,8 +180,8 @@ const HeroBanner = memo(() => {
         <Box
           sx={{
             display: { xs: 'none', sm: 'flex' },
-            gap: s(10),
-            mt: s(8),
+            gap: { xs: 0.5, sm: 0.75, md: 1 },
+            mt: { xs: 0.5, sm: 0.75, md: 1 },
           }}
         >
           {featureTags.map(({ Icon, title, subtitle }) => (
@@ -221,20 +190,20 @@ const HeroBanner = memo(() => {
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: s(6),
-                px: s(12),
-                py: s(6),
-                borderRadius: s(10),
+                gap: 0.5,
+                px: { xs: 0.75, sm: 1, md: 1.25 },
+                py: { xs: 0.3, sm: 0.4, md: 0.5 },
+                borderRadius: { xs: 0.75, sm: 1, md: 1.25 },
                 bgcolor: 'rgba(15, 35, 75, 0.55)',
                 backdropFilter: 'blur(4px)',
                 border: '1px solid rgba(0, 170, 255, 0.15)',
               }}
             >
-              <Icon sx={{ fontSize: s(14), color: '#FFFFFF' }} />
+              <Icon sx={{ fontSize: { xs: 12, sm: 13, md: 14 }, color: '#FFFFFF' }} />
               <Box>
                 <Typography
                   sx={{
-                    fontSize: s(11),
+                    fontSize: { xs: 10, sm: 10.5, md: 11 },
                     fontWeight: 600,
                     color: '#FFFFFF',
                     lineHeight: 1.2,
@@ -245,7 +214,7 @@ const HeroBanner = memo(() => {
                 </Typography>
                 <Typography
                   sx={{
-                    fontSize: s(9),
+                    fontSize: { xs: 8, sm: 8.5, md: 9 },
                     color: '#FFFFFF',
                     opacity: 0.7,
                     lineHeight: 1.3,
@@ -264,8 +233,8 @@ const HeroBanner = memo(() => {
       <Box
         sx={{
           position: 'absolute',
-          right: s(28),
-          top: s(16),
+          right: { md: 2, lg: 2.5, xl: 3 },
+          top: { md: 1, lg: 1.25, xl: 1.5 },
           zIndex: 11,
           transform: `rotate(-6deg)`,
           transformOrigin: 'right top',
@@ -274,14 +243,14 @@ const HeroBanner = memo(() => {
       >
         <Typography
           sx={{
-            fontSize: s(26),
+            fontSize: { md: 20, lg: 23, xl: 26 },
             color: '#FFFFFF',
             fontFamily: '"Brush Script MT", "Comic Sans MS", cursive',
             fontStyle: 'italic',
             lineHeight: 1,
             whiteSpace: 'nowrap',
             borderBottom: '2px solid rgba(0, 170, 255, 0.8)',
-            paddingBottom: s(3),
+            paddingBottom: 0.25,
             textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
           }}
         >

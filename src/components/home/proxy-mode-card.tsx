@@ -70,6 +70,8 @@ const ProxyModeCard = memo(() => {
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
+        height: '100%',
+        minHeight: 0,
       }}
     >
       {/* 标题 */}
@@ -90,7 +92,7 @@ const ProxyModeCard = memo(() => {
       </Box>
 
       {/* 三个模式按钮 */}
-      <Box sx={{ display: 'flex', gap: 1 }}>
+      <Box sx={{ display: 'flex', gap: 1, flex: 1, minHeight: 0, alignItems: 'center' }}>
         {modes.map((mode) => {
           const isActive = currentMode === mode.key
           return (
@@ -142,6 +144,7 @@ const ProxyModeCard = memo(() => {
           lineHeight: 1.5,
           pt: 1,
           borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+          flexShrink: 0,
         }}
       >
         基于预设规则智能判断流量走向，提供灵活的代理策略

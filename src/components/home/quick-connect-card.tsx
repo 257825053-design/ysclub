@@ -113,6 +113,8 @@ const QuickConnectCard = memo(() => {
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
+        height: '100%',
+        minHeight: 0,
       }}
     >
       {/* 标题 */}
@@ -165,7 +167,7 @@ const QuickConnectCard = memo(() => {
         </Select>
       </Box>
 
-      {/* 信息展示区域 */}
+      {/* 信息展示区域 - flex:1 填充剩余空间 */}
       <Box
         sx={{
           display: 'flex',
@@ -175,6 +177,9 @@ const QuickConnectCard = memo(() => {
           borderRadius: 2,
           bgcolor: 'rgba(255, 255, 255, 0.02)',
           border: '1px solid rgba(255, 255, 255, 0.04)',
+          flex: 1,
+          minHeight: 0,
+          justifyContent: 'center',
         }}
       >
         {/* 当前节点 */}
@@ -259,6 +264,7 @@ const QuickConnectCard = memo(() => {
           fontSize: 14,
           fontWeight: 700,
           letterSpacing: '0.5px',
+          flexShrink: 0,
           background: isConnected
             ? 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)'
             : 'linear-gradient(135deg, #2378F5 0%, #4F46E5 100%)',

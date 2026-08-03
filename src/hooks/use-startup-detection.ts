@@ -10,19 +10,16 @@ import { hideInitialOverlay, updateOverlayProgress } from '@/pages/_layout/utils
  * 1. 检测屏幕分辨率与 DPI 缩放
  * 2. 计算最优窗口尺寸
  * 3. 调整窗口大小（Tauri IPC）
- * 4. 计算内容缩放系数
- * 5. 等待页面布局稳定
- * 6. 隐藏加载层，展示主界面
+ * 4. 等待页面布局稳定，通知 React 重新计算布局
+ * 5. 隐藏加载层，展示主界面
  *
- * 每一步完成后更新进度条百分比和状态文字，让用户感知启动进度。
+ * 关键改进：
+ * - 窗口尺寸调整后，主动派发 resize 事件，触发 useWindowMode 重新计算密度模式
+ * - 不再使用 --ui-scale CSS 变量做全局缩放，改由 flexbox + useWindowMode 自适应
+ * - 等待两帧确保 React 完成重渲染后再隐藏加载层
  */
 
 const TITLEBAR_HEIGHT = 36
-const BASEPAGE_HEADER_HEIGHT = 48
-const PADDING = 24
-const DESIGN_BASELINE_HEIGHT = 650
-const MIN_SCALE = 0.72
-const MAX_SCALE = 1.15
 const MINIMAL_WIDTH = 520
 const MINIMAL_HEIGHT = 520
 const MAX_ADAPTIVE_WIDTH = 1180
@@ -34,12 +31,12 @@ interface DetectionStep {
 }
 
 const STEPS: DetectionStep[] = [
-  { label: '检测屏幕分辨率...', weight: 15 },
-  { label: '计算最优窗口尺寸...', weight: 25 },
-  { label: '调整窗口大小...', weight: 45 },
-  { label: '优化界面缩放...', weight: 65 },
-  { label: '加载首页组件...', weight: 85 },
-  { label: '准备就绪', weight: 100 },
+  { label: '初始化云山俱乐部', weight: 15 },
+  { label: '检测设备环境', weight: 30 },
+  { label: '调整窗口尺寸', weight: 50 },
+  { label: '优化显示方案', weight: 75 },
+  { label: '加载网络模块', weight: 90 },
+  { label: '进入YSCLUB', weight: 100 },
 ]
 
 /** 计算分步进度 */
@@ -124,29 +121,29 @@ export function useStartupDetection(themeReady: boolean) {
           // 非 Tauri 环境忽略
         }
 
-        // ===== Step 3: 优化界面缩放 =====
+        // ===== Step 3: 通知 React 重新计算布局 =====
         updateOverlayProgress(stepProgress(2), STEPS[3].label)
         await delay(300)
         if (cancelled) return
 
-        const viewportHeight = window.innerHeight
-        const availableHeight =
-          viewportHeight - TITLEBAR_HEIGHT - BASEPAGE_HEADER_HEIGHT - PADDING
-        const uiScale = Math.max(
-          MIN_SCALE,
-          Math.min(MAX_SCALE, availableHeight / DESIGN_BASELINE_HEIGHT),
-        )
-        document.documentElement.style.setProperty(
-          '--ui-scale',
-          uiScale.toFixed(4),
-        )
+        // 主动派发 resize 事件，触发 useWindowMode 重新计算密度模式
+        // 这是关键步骤：窗口尺寸改变后，必须通知 React 重新计算布局
+        window.dispatchEvent(new Event('resize'))
 
         // ===== Step 4: 等待页面布局稳定 =====
         updateOverlayProgress(stepProgress(3), STEPS[4].label)
         await delay(400)
         if (cancelled) return
 
-        // 等待一帧确保 React 完成渲染
+        // 等待两帧确保 React 完成重渲染（useWindowMode 更新 → 组件重绘）
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        })
+
+        // 再次派发 resize，确保最终布局稳定
+        window.dispatchEvent(new Event('resize'))
+
+        // 再等待一帧让二次渲染完成
         await new Promise<void>((resolve) => {
           requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
         })
@@ -157,12 +154,7 @@ export function useStartupDetection(themeReady: boolean) {
         if (cancelled) return
 
         // 隐藏加载层
-        const timer = hideInitialOverlay()
-
-        // 清理定时器
-        if (timer !== undefined) {
-          // overlay 会在 200ms 后自动移除
-        }
+        hideInitialOverlay()
       } catch {
         // 出错时也要隐藏加载层，避免卡死
         hideInitialOverlay()
