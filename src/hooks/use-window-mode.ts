@@ -5,21 +5,19 @@ import { useEffect, useState } from 'react'
  *
  * 根据窗口实际可用高度自动选择 UI 密度模式：
  *
- * 基准窗口 1100×960，可用高度 = 960 - 36 - 48 = 876px → spacious 模式
+ * 基准窗口 1100×960，可用高度 ≈ 876px → Large 模式
  *
- * - compact（紧凑模式）：< 700px 可用高度
- *   隐藏副标题、辅助文字，卡片间距缩小，保留核心功能
+ * - Compact（紧凑模式）：< 680px 可用高度
+ *   卡片间距缩小，内边距缩小
  *
- * - standard（标准模式）：700-850px 可用高度
+ * - Standard（标准模式）：680-820px 可用高度
  *   完整显示所有卡片，标准间距
  *
- * - spacious（宽敞模式）：> 850px 可用高度
+ * - Large（大屏模式）：> 820px 可用高度
  *   所有内容完整展示，间距更大，体验最佳
- *
- * 同时提供可用宽高供组件做精细判断。
  */
 
-export type WindowMode = 'compact' | 'standard' | 'spacious'
+export type WindowMode = 'compact' | 'standard' | 'large'
 
 export interface WindowModeInfo {
   mode: WindowMode
@@ -45,14 +43,14 @@ function computeMode(): WindowModeInfo {
   const availableWidth = viewportWidth
 
   let mode: WindowMode = 'standard'
-  if (availableHeight < 700) {
+  if (availableHeight < 680) {
     mode = 'compact'
-  } else if (availableHeight > 850) {
-    mode = 'spacious'
+  } else if (availableHeight > 820) {
+    mode = 'large'
   }
 
-  const cardGap = mode === 'compact' ? 6 : mode === 'spacious' ? 12 : 8
-  const pagePadding = mode === 'compact' ? 8 : mode === 'spacious' ? 16 : 12
+  const cardGap = mode === 'compact' ? 6 : mode === 'large' ? 12 : 8
+  const pagePadding = mode === 'compact' ? 8 : mode === 'large' ? 14 : 10
   const showSubtitle = mode !== 'compact'
   const showHelperText = mode !== 'compact'
 

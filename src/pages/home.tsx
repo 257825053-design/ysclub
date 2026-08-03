@@ -17,33 +17,34 @@ export const preloadHomePageCards = () => Promise.resolve()
 // ==================== 主页面 ====================
 
 /**
- * HomePage - 首页（Flex 弹性布局 + 窗口密度自适应）
+ * HomePage - 首页（纯 Flex 布局，禁止滚动）
  *
- * 布局架构（Flex Column）:
+ * 布局架构（Flex Column，严格高度分配）:
  * ```
- * ┌─────────────────────────────┐
- * │  Hero Banner (flexShrink:0) │  固定高度区域
- * ├─────────────────────────────┤
- * │  订阅信息  │  快速连接       │
- * │  网络设置  │  代理模式 │ 流量 │  flex:1 自动填充
- * │                             │
- * ├─────────────────────────────┤
- * │  快捷工具 (flexShrink:0)     │  固定高度区域
- * └─────────────────────────────┘
- * ```
+ * ┌──────────────────────────────────┐
+ * │  Hero Banner   flexShrink: 0     │  固定高度，不压缩
+ * ├──────────────────────────────────┤
+ * │  Row 1: 订阅信息 | 快速连接       │
+ * │                  flex: 1         │  自适应填充，平均分配
+ * ├──────────────────────────────────┤
+ * │  Row 2: 网络 | 代理 | 流量        │
+ * │                  flex: 1         │  自适应填充，平均分配
+ * ├──────────────────────────────────┤
+ * │  快捷工具      flexShrink: 0     │  固定高度，不压缩
+ * └──────────────────────────────────┘
  *
- * 自适应策略：
- * 1. useWindowMode 根据可用高度选择 compact/standard/spacious 密度
- * 2. 中间卡片区域使用 flex:1 自动填充剩余空间
- * 3. Banner 和快捷工具使用 flexShrink:0 保证不被压缩
- * 4. 小屏幕（compact 模式）允许垂直滚动，避免内容被裁切
- * 5. 卡片内部使用 minHeight + height:auto，不再使用固定 px 高度
+ * 关键设计：
+ * 1. 禁止滚动 (overflow: hidden)，所有内容必须在 viewport 内
+ * 2. 使用 flex 而非 grid，确保子项正确拉伸填充
+ * 3. 每行使用 flex: 1 + minHeight: 0 允许收缩
+ * 4. 卡片使用 flex: 1 共享行宽度
+ * 5. Banner 和 QuickTools 使用 flexShrink: 0 不被压缩
  */
 const HomePage = () => {
-  const { mode, cardGap, pagePadding } = useWindowMode()
+  const { cardGap, pagePadding } = useWindowMode()
 
   return (
-    <BasePage title="首页" full contentStyle={{ padding: 0 }}>
+    <BasePage title="首页" full noScroll contentStyle={{ padding: 0 }}>
       <Box
         sx={{
           width: '100%',
@@ -54,23 +55,7 @@ const HomePage = () => {
           boxSizing: 'border-box',
           bgcolor: '#0B101C',
           gap: `${cardGap}px`,
-          // compact 模式允许滚动，其他模式隐藏滚动
-          overflowY: mode === 'compact' ? 'auto' : 'hidden',
-          overflowX: 'hidden',
-          // 美化滚动条
-          '&::-webkit-scrollbar': {
-            width: 4,
-          },
-          '&::-webkit-scrollbar-track': {
-            background: 'transparent',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: 'rgba(255, 255, 255, 0.1)',
-            borderRadius: 2,
-          },
-          '&::-webkit-scrollbar-thumb:hover': {
-            background: 'rgba(255, 255, 255, 0.2)',
-          },
+          overflow: 'hidden',
         }}
       >
         {/* ========== 第一区域：Banner（固定高度，不压缩） ========== */}
@@ -78,59 +63,46 @@ const HomePage = () => {
           <HeroBanner />
         </Box>
 
-        {/* ========== 第二区域：中间卡片组（flex:1 自动填充） ========== */}
+        {/* ========== 第二区域：中间卡片行 1（flex:1 自适应） ========== */}
         <Box
           sx={{
-            flex: 1,
             display: 'flex',
-            flexDirection: 'column',
             gap: `${cardGap}px`,
-            minHeight: 0, // 关键：允许 flex 子项收缩
-            overflow: 'hidden',
+            width: '100%',
+            flex: 1,
+            minHeight: 0,
           }}
         >
-          {/* 第一行：订阅信息 + 快速连接 */}
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                md: 'minmax(0, 1fr) minmax(0, 1fr)',
-              },
-              gap: `${cardGap}px`,
-              width: '100%',
-              flex: 1,
-              minHeight: 0,
-              '& > *': { minWidth: 0, overflow: 'hidden' },
-            }}
-          >
+          <Box sx={{ flex: 1, minWidth: 0, height: '100%' }}>
             <SubscriptionInfoCard />
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0, height: '100%' }}>
             <QuickConnectCard />
           </Box>
+        </Box>
 
-          {/* 第二行：网络设置 + 代理模式 + 实时流量 */}
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: 'minmax(0, 1fr) minmax(0, 1fr)',
-                md: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)',
-              },
-              gap: `${cardGap}px`,
-              width: '100%',
-              flex: 1,
-              minHeight: 0,
-              '& > *': { minWidth: 0, overflow: 'hidden' },
-            }}
-          >
+        {/* ========== 第三区域：中间卡片行 2（flex:1 自适应） ========== */}
+        <Box
+          sx={{
+            display: 'flex',
+            gap: `${cardGap}px`,
+            width: '100%',
+            flex: 1,
+            minHeight: 0,
+          }}
+        >
+          <Box sx={{ flex: 1, minWidth: 0, height: '100%' }}>
             <NetworkSettingsCard />
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0, height: '100%' }}>
             <ProxyModeCard />
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0, height: '100%' }}>
             <TrafficCard />
           </Box>
         </Box>
 
-        {/* ========== 第三区域：快捷工具（固定高度，不压缩） ========== */}
+        {/* ========== 第四区域：快捷工具（固定高度，不压缩） ========== */}
         <Box sx={{ width: '100%', flexShrink: 0 }}>
           <QuickToolsCard />
         </Box>
