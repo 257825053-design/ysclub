@@ -1,6 +1,5 @@
 import { Box } from '@mui/material'
 
-import { BasePage } from '@/components/base'
 import HeroBanner from '@/components/home/hero-banner'
 import SubscriptionInfoCard from '@/components/home/subscription-info-card'
 import QuickConnectCard from '@/components/home/quick-connect-card'
@@ -8,7 +7,6 @@ import NetworkSettingsCard from '@/components/home/network-settings-card'
 import ProxyModeCard from '@/components/home/proxy-mode-card'
 import TrafficCard from '@/components/home/traffic-card'
 import QuickToolsCard from '@/components/home/quick-tools-card'
-import { useWindowMode } from '@/hooks/use-window-mode'
 
 // ==================== 预加载 ====================
 
@@ -17,97 +15,108 @@ export const preloadHomePageCards = () => Promise.resolve()
 // ==================== 主页面 ====================
 
 /**
- * HomePage - 首页（纯 Flex 布局，禁止滚动）
+ * HomePage - 首页（纯 CSS Grid 布局，禁止滚动）
  *
- * 布局架构（Flex Column，严格高度分配）:
- * ```
- * ┌──────────────────────────────────┐
- * │  Hero Banner   flexShrink: 0     │  固定高度，不压缩
- * ├──────────────────────────────────┤
- * │  Row 1: 订阅信息 | 快速连接       │
- * │                  flex: 1         │  自适应填充，平均分配
- * ├──────────────────────────────────┤
- * │  Row 2: 网络 | 代理 | 流量        │
- * │                  flex: 1         │  自适应填充，平均分配
- * ├──────────────────────────────────┤
- * │  快捷工具      flexShrink: 0     │  固定高度，不压缩
- * └──────────────────────────────────┘
+ * 核心策略：使用 CSS Grid + minmax(0, 1fr) 防止卡片内容撑开容器
  *
- * 关键设计：
- * 1. 禁止滚动 (overflow: hidden)，所有内容必须在 viewport 内
- * 2. 使用 flex 而非 grid，确保子项正确拉伸填充
- * 3. 每行使用 flex: 1 + minHeight: 0 允许收缩
- * 4. 卡片使用 flex: 1 共享行宽度
- * 5. Banner 和 QuickTools 使用 flexShrink: 0 不被压缩
+ * 布局架构:
+ * ┌──────────────────────────────────────┐
+ * │  Hero Banner          auto           │  固定高度
+ * ├──────────────────────────────────────┤
+ * │  订阅信息    │    快速连接             │
+ * │             minmax(0, 1fr)           │  自适应，不可撑开
+ * ├──────────────────────────────────────┤
+ * │  网络设置  │  代理模式  │  实时流量    │
+ * │             minmax(0, 1fr)           │  自适应，不可撑开
+ * ├──────────────────────────────────────┤
+ * │  快捷工具             auto            │  固定高度
+ * └──────────────────────────────────────┘
+ *
+ * 关键点：
+ * 1. minmax(0, 1fr) 而非 1fr — 防止内容撑开行高
+ * 2. 每个卡片包裹层 overflow:hidden + min-width:0 + min-height:0
+ * 3. 每个卡片自身 height:100% + overflow:hidden
+ * 4. 整体 overflow:hidden 禁止滚动
  */
 const HomePage = () => {
-  const { cardGap, pagePadding } = useWindowMode()
-
   return (
-    <BasePage title="首页" full noScroll contentStyle={{ padding: 0 }}>
+    <Box
+      sx={{
+        // ===== 根容器：填满父级 .the-content =====
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+        bgcolor: '#0B101C',
+        boxSizing: 'border-box',
+        display: 'grid',
+        // 4 行：Banner(auto) + 卡片行1(1fr) + 卡片行2(1fr) + 快捷工具(auto)
+        gridTemplateRows: 'auto minmax(0, 1fr) minmax(0, 1fr) auto',
+        // 间距
+        gap: '8px',
+        p: '10px',
+      }}
+    >
+      {/* ===== Row 1: Banner ===== */}
       <Box
         sx={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          p: `${pagePadding}px`,
-          boxSizing: 'border-box',
-          bgcolor: '#0B101C',
-          gap: `${cardGap}px`,
+          gridColumn: '1 / -1',
           overflow: 'hidden',
+          minHeight: 0,
         }}
       >
-        {/* ========== 第一区域：Banner（固定高度，不压缩） ========== */}
-        <Box sx={{ width: '100%', flexShrink: 0 }}>
-          <HeroBanner />
-        </Box>
+        <HeroBanner />
+      </Box>
 
-        {/* ========== 第二区域：中间卡片行 1（flex:1 自适应） ========== */}
-        <Box
-          sx={{
-            display: 'flex',
-            gap: `${cardGap}px`,
-            width: '100%',
-            flex: 1,
-            minHeight: 0,
-          }}
-        >
-          <Box sx={{ flex: 1, minWidth: 0, height: '100%' }}>
-            <SubscriptionInfoCard />
-          </Box>
-          <Box sx={{ flex: 1, minWidth: 0, height: '100%' }}>
-            <QuickConnectCard />
-          </Box>
+      {/* ===== Row 2: 订阅信息 + 快速连接 ===== */}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+          gap: '8px',
+          overflow: 'hidden',
+          minHeight: 0,
+        }}
+      >
+        <Box sx={{ overflow: 'hidden', minHeight: 0, minWidth: 0 }}>
+          <SubscriptionInfoCard />
         </Box>
-
-        {/* ========== 第三区域：中间卡片行 2（flex:1 自适应） ========== */}
-        <Box
-          sx={{
-            display: 'flex',
-            gap: `${cardGap}px`,
-            width: '100%',
-            flex: 1,
-            minHeight: 0,
-          }}
-        >
-          <Box sx={{ flex: 1, minWidth: 0, height: '100%' }}>
-            <NetworkSettingsCard />
-          </Box>
-          <Box sx={{ flex: 1, minWidth: 0, height: '100%' }}>
-            <ProxyModeCard />
-          </Box>
-          <Box sx={{ flex: 1, minWidth: 0, height: '100%' }}>
-            <TrafficCard />
-          </Box>
-        </Box>
-
-        {/* ========== 第四区域：快捷工具（固定高度，不压缩） ========== */}
-        <Box sx={{ width: '100%', flexShrink: 0 }}>
-          <QuickToolsCard />
+        <Box sx={{ overflow: 'hidden', minHeight: 0, minWidth: 0 }}>
+          <QuickConnectCard />
         </Box>
       </Box>
-    </BasePage>
+
+      {/* ===== Row 3: 网络设置 + 代理模式 + 实时流量 ===== */}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)',
+          gap: '8px',
+          overflow: 'hidden',
+          minHeight: 0,
+        }}
+      >
+        <Box sx={{ overflow: 'hidden', minHeight: 0, minWidth: 0 }}>
+          <NetworkSettingsCard />
+        </Box>
+        <Box sx={{ overflow: 'hidden', minHeight: 0, minWidth: 0 }}>
+          <ProxyModeCard />
+        </Box>
+        <Box sx={{ overflow: 'hidden', minHeight: 0, minWidth: 0 }}>
+          <TrafficCard />
+        </Box>
+      </Box>
+
+      {/* ===== Row 4: 快捷工具 ===== */}
+      <Box
+        sx={{
+          gridColumn: '1 / -1',
+          overflow: 'hidden',
+          minHeight: 0,
+        }}
+      >
+        <QuickToolsCard />
+      </Box>
+    </Box>
   )
 }
 

@@ -115,6 +115,7 @@ const QuickConnectCard = memo(() => {
         gap: 1,
         height: '100%',
         minHeight: 0,
+        overflow: 'hidden',
       }}
     >
       {/* 标题 */}
