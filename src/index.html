@@ -35,12 +35,83 @@
         inset: 0;
         background: var(--bg-color);
         z-index: 9999;
-        transition: opacity 0.2s ease-out;
+        transition: opacity 0.4s ease-out;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        padding-bottom: 8vh;
+        overflow: hidden;
       }
 
       #initial-loading-overlay[data-hidden='true'] {
         opacity: 0;
         pointer-events: none;
+      }
+
+      #initial-loading-overlay .startup-bg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 0;
+      }
+
+      #initial-loading-overlay .startup-bg-fallback {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, #080F24 0%, #0F1A35 50%, #080F24 100%);
+        z-index: 0;
+      }
+
+      #initial-loading-overlay .startup-content {
+        position: relative;
+        z-index: 1;
+        width: 320px;
+        max-width: 80vw;
+        text-align: center;
+      }
+
+      #initial-loading-overlay .startup-title {
+        font-size: 22px;
+        font-weight: 800;
+        color: #FFFFFF;
+        letter-spacing: 3px;
+        margin-bottom: 6px;
+        text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+      }
+
+      #initial-loading-overlay .startup-subtitle {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.55);
+        letter-spacing: 1.5px;
+        margin-bottom: 24px;
+      }
+
+      #initial-loading-overlay .startup-progress-track {
+        width: 100%;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      #initial-loading-overlay .startup-progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #2378F5, #4F46E5);
+        border-radius: 2px;
+        transition: width 0.3s ease-out;
+        box-shadow: 0 0 8px rgba(35, 120, 245, 0.6);
+      }
+
+      #initial-loading-overlay .startup-status-text {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.45);
+        letter-spacing: 0.5px;
+        margin-top: 10px;
+        min-height: 16px;
       }
     </style>
     <script>
@@ -568,7 +639,18 @@
     </script>
   </head>
   <body>
-    <div id="initial-loading-overlay"></div>
+    <div id="initial-loading-overlay">
+      <div class="startup-bg-fallback"></div>
+      <img class="startup-bg" src="./assets/image/startup-bg.png" alt="" onerror="this.style.display='none'" />
+      <div class="startup-content">
+        <div class="startup-title">YSCLUB</div>
+        <div class="startup-subtitle">GLOBAL NETWORK ACCESS</div>
+        <div class="startup-progress-track">
+          <div class="startup-progress-bar" id="startup-progress-bar"></div>
+        </div>
+        <div class="startup-status-text" id="startup-status-text">正在启动...</div>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="./main.tsx"></script>
   </body>

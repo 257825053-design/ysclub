@@ -43,6 +43,7 @@ import {
   WindowResizeHandles,
 } from '@/components/layout/window-controller'
 import { useI18n } from '@/hooks/use-i18n'
+import { useStartupDetection } from '@/hooks/use-startup-detection'
 import { useVerge } from '@/hooks/use-verge'
 import { useWindowDecorations } from '@/hooks/use-window'
 import { useThemeMode } from '@/services/states'
@@ -51,7 +52,6 @@ import getSystem from '@/utils/get-system'
 import {
   useCustomTheme,
   useLayoutEvents,
-  useLoadingOverlay,
   useNavMenuOrder,
 } from './_layout/hooks'
 import { handleNoticeMessage } from './_layout/utils'
@@ -217,7 +217,7 @@ const Layout = () => {
     [decorated],
   )
 
-  useLoadingOverlay(themeReady)
+  useStartupDetection(themeReady)
 
   const handleNotice = useCallback(
     (payload: [string, string]) => {
