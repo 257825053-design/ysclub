@@ -15,17 +15,16 @@ const DARK_BACKGROUND_HEX: &str = "#0B101C";
 const LIGHT_BACKGROUND_HEX: &str = "#F5F5F5";
 
 // 定义默认窗口尺寸常量（仅作为无法获取屏幕信息时的后备值）
-// 基准：1920×1080 @ 100% 缩放下，1100×960 可完整展示首页所有卡片
-const DEFAULT_WIDTH: f64 = 1100.0;
-const DEFAULT_HEIGHT: f64 = 960.0;
+const DEFAULT_WIDTH: f64 = 900.0;
+const DEFAULT_HEIGHT: f64 = 680.0;
 
-// 最小窗口尺寸：不低于此值，确保首页所有卡片完整展示
-const MINIMAL_WIDTH: f64 = 1100.0;
-const MINIMAL_HEIGHT: f64 = 960.0;
+// 最小窗口尺寸：允许用户自由缩小窗口
+const MINIMAL_WIDTH: f64 = 700.0;
+const MINIMAL_HEIGHT: f64 = 500.0;
 
 // 自适应窗口尺寸的上限（大屏可适当放大，但不超此范围）
-const MAX_ADAPTIVE_WIDTH: f64 = 1400.0;
-const MAX_ADAPTIVE_HEIGHT: f64 = 1080.0;
+const MAX_ADAPTIVE_WIDTH: f64 = 1200.0;
+const MAX_ADAPTIVE_HEIGHT: f64 = 900.0;
 
 /// 根据主屏幕的逻辑分辨率计算自适应窗口尺寸
 ///
@@ -33,9 +32,8 @@ const MAX_ADAPTIVE_HEIGHT: f64 = 1080.0;
 /// `primary_monitor().size()` 返回物理像素，需除以 `scale_factor` 转换为逻辑像素。
 ///
 /// 策略：
-/// - 基准尺寸 1100×960（逻辑像素），在任何 100% 缩放屏幕上都能完整展示首页
-/// - 若屏幕逻辑分辨率远大于基准（如 2560×1440），则按比例放大，但不超过上限
-/// - 若屏幕逻辑分辨率小于基准，仍使用基准尺寸（由 OS 处理溢出）
+/// - 默认 900×680（逻辑像素），适配大多数屏幕
+/// - 根据屏幕逻辑分辨率按比例调整，但不超过上限
 /// - DPI 缩放由 Tauri/OS 自动处理，逻辑像素尺寸不变
 fn compute_adaptive_window_size(app_handle: &tauri::AppHandle) -> (f64, f64) {
     let (mut width, mut height) = (DEFAULT_WIDTH, DEFAULT_HEIGHT);
@@ -47,15 +45,14 @@ fn compute_adaptive_window_size(app_handle: &tauri::AppHandle) -> (f64, f64) {
         let logical_w = phys.width as f64 / scale;
         let logical_h = phys.height as f64 / scale;
 
-        // 基准 1100×960，若屏幕逻辑分辨率充足则按比例放大
-        // 宽度比例 = logical_w / 1920，高度比例 = logical_h / 1080
-        // 取较小比例确保窗口不会超出屏幕
+        // 根据屏幕逻辑分辨率按比例调整窗口尺寸
+        // 宽度占屏幕 47%，高度占屏幕 63%，确保不超出屏幕且留有余量
         let ratio_w = logical_w / 1920.0;
         let ratio_h = logical_h / 1080.0;
-        let ratio = ratio_w.min(ratio_h).min(1.3).max(1.0);
+        let ratio = ratio_w.min(ratio_h).min(1.3).max(0.75);
 
-        width = (DEFAULT_WIDTH * ratio).clamp(DEFAULT_WIDTH, MAX_ADAPTIVE_WIDTH);
-        height = (DEFAULT_HEIGHT * ratio).clamp(DEFAULT_HEIGHT, MAX_ADAPTIVE_HEIGHT);
+        width = (DEFAULT_WIDTH * ratio).clamp(MINIMAL_WIDTH, MAX_ADAPTIVE_WIDTH);
+        height = (DEFAULT_HEIGHT * ratio).clamp(MINIMAL_HEIGHT, MAX_ADAPTIVE_HEIGHT);
     }
 
     (width, height)
@@ -341,19 +338,19 @@ mod tests {
 
     #[test]
     fn restored_window_size_rejects_zero_dimensions() {
-        assert!(restored_window_size_is_too_small(0, 700));
-        assert!(restored_window_size_is_too_small(940, 0));
+        assert!(restored_window_size_is_too_small(0, 400));
+        assert!(restored_window_size_is_too_small(600, 0));
     }
 
     #[test]
     fn restored_window_size_rejects_dimensions_below_minimum() {
-        assert!(restored_window_size_is_too_small(519, 700));
-        assert!(restored_window_size_is_too_small(940, 519));
+        assert!(restored_window_size_is_too_small(519, 400));
+        assert!(restored_window_size_is_too_small(600, 419));
     }
 
     #[test]
     fn restored_window_size_accepts_minimum_or_larger_dimensions() {
-        assert!(!restored_window_size_is_too_small(520, 520));
-        assert!(!restored_window_size_is_too_small(940, 700));
+        assert!(!restored_window_size_is_too_small(700, 500));
+        assert!(!restored_window_size_is_too_small(900, 680));
     }
 }

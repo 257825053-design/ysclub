@@ -42,8 +42,6 @@ const TrafficCard = memo(() => {
         flexDirection: 'column',
         gap: 1,
         minWidth: 0,
-        minHeight: 0,
-        height: '100%',
         overflow: 'hidden',
       }}
     >
@@ -106,8 +104,7 @@ const TrafficCard = memo(() => {
       {/* 流量图 - flex:1 自适应高度 */}
       <Box
         sx={{
-          flex: 1,
-          minHeight: 30,
+          height: 80,
           borderRadius: 1.5,
           overflow: 'hidden',
           bgcolor: 'rgba(0, 0, 0, 0.2)',

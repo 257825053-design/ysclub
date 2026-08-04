@@ -15,55 +15,56 @@ export const preloadHomePageCards = () => Promise.resolve()
 // ==================== 主页面 ====================
 
 /**
- * HomePage - 首页（纯 CSS Grid 布局，禁止滚动）
+ * HomePage - 首页（CSS Grid 布局，所有行 auto 自然高度）
  *
- * 核心策略：使用 CSS Grid + minmax(0, 1fr) 防止卡片内容撑开容器
+ * 核心策略：所有行使用 auto 高度，卡片取自然高度不拉伸
+ * 整体居中对齐，内容溢出时允许滚动
  *
  * 布局架构:
  * ┌──────────────────────────────────────┐
- * │  Hero Banner          auto           │  固定高度
+ * │  Hero Banner          auto           │
  * ├──────────────────────────────────────┤
- * │  订阅信息    │    快速连接             │
- * │             minmax(0, 1fr)           │  自适应，不可撑开
+ * │  订阅信息    │    快速连接   auto     │
  * ├──────────────────────────────────────┤
- * │  网络设置  │  代理模式  │  实时流量    │
- * │             minmax(0, 1fr)           │  自适应，不可撑开
+ * │  网络设置  │  代理模式  │  实时流量    │ auto
  * ├──────────────────────────────────────┤
- * │  快捷工具             auto            │  固定高度
+ * │  快捷工具             auto            │
  * └──────────────────────────────────────┘
- *
- * 关键点：
- * 1. minmax(0, 1fr) 而非 1fr — 防止内容撑开行高
- * 2. 每个卡片包裹层 overflow:hidden + min-width:0 + min-height:0
- * 3. 每个卡片自身 height:100% + overflow:hidden
- * 4. 整体 overflow:hidden 禁止滚动
  */
 const HomePage = () => {
   return (
     <Box
       sx={{
-        // ===== 根容器：填满父级 .the-content =====
         width: '100%',
         height: '100%',
-        overflow: 'hidden',
+        overflow: 'auto',
         bgcolor: '#0B101C',
         boxSizing: 'border-box',
         display: 'grid',
-        // 4 行：Banner(auto) + 卡片行1(1fr) + 卡片行2(1fr) + 快捷工具(auto)
-        gridTemplateRows: 'auto minmax(0, 1fr) minmax(0, 1fr) auto',
-        // 间距
+        // 所有行 auto：卡片取自然高度，不拉伸不变形
+        gridTemplateRows: 'auto auto auto auto',
+        // 垂直方向从顶部开始排列
+        alignContent: 'start',
         gap: '8px',
         p: '10px',
+        // 美化滚动条
+        '&::-webkit-scrollbar': {
+          width: '6px',
+        },
+        '&::-webkit-scrollbar-track': {
+          background: 'transparent',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '3px',
+        },
+        '&::-webkit-scrollbar-thumb:hover': {
+          background: 'rgba(255, 255, 255, 0.2)',
+        },
       }}
     >
       {/* ===== Row 1: Banner ===== */}
-      <Box
-        sx={{
-          gridColumn: '1 / -1',
-          overflow: 'hidden',
-          minHeight: 0,
-        }}
-      >
+      <Box sx={{ gridColumn: '1 / -1' }}>
         <HeroBanner />
       </Box>
 
@@ -73,14 +74,12 @@ const HomePage = () => {
           display: 'grid',
           gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
           gap: '8px',
-          overflow: 'hidden',
-          minHeight: 0,
         }}
       >
-        <Box sx={{ overflow: 'hidden', minHeight: 0, minWidth: 0 }}>
+        <Box sx={{ minWidth: 0 }}>
           <SubscriptionInfoCard />
         </Box>
-        <Box sx={{ overflow: 'hidden', minHeight: 0, minWidth: 0 }}>
+        <Box sx={{ minWidth: 0 }}>
           <QuickConnectCard />
         </Box>
       </Box>
@@ -91,29 +90,21 @@ const HomePage = () => {
           display: 'grid',
           gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)',
           gap: '8px',
-          overflow: 'hidden',
-          minHeight: 0,
         }}
       >
-        <Box sx={{ overflow: 'hidden', minHeight: 0, minWidth: 0 }}>
+        <Box sx={{ minWidth: 0 }}>
           <NetworkSettingsCard />
         </Box>
-        <Box sx={{ overflow: 'hidden', minHeight: 0, minWidth: 0 }}>
+        <Box sx={{ minWidth: 0 }}>
           <ProxyModeCard />
         </Box>
-        <Box sx={{ overflow: 'hidden', minHeight: 0, minWidth: 0 }}>
+        <Box sx={{ minWidth: 0 }}>
           <TrafficCard />
         </Box>
       </Box>
 
       {/* ===== Row 4: 快捷工具 ===== */}
-      <Box
-        sx={{
-          gridColumn: '1 / -1',
-          overflow: 'hidden',
-          minHeight: 0,
-        }}
-      >
+      <Box sx={{ gridColumn: '1 / -1' }}>
         <QuickToolsCard />
       </Box>
     </Box>

@@ -70,9 +70,6 @@ const ProxyModeCard = memo(() => {
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
-        height: '100%',
-        minHeight: 0,
-        overflow: 'hidden',
       }}
     >
       {/* 标题 */}
@@ -93,7 +90,7 @@ const ProxyModeCard = memo(() => {
       </Box>
 
       {/* 三个模式按钮 */}
-      <Box sx={{ display: 'flex', gap: 1, flex: 1, minHeight: 0, alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
         {modes.map((mode) => {
           const isActive = currentMode === mode.key
           return (

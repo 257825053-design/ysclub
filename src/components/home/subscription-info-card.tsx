@@ -85,8 +85,6 @@ const SubscriptionInfoCard = memo(() => {
         flexDirection: 'column',
         gap: 0.75,
         overflow: 'hidden',
-        height: '100%',
-        minHeight: 0,
       }}
     >
       {/* 闪烁蓝点动画样式 */}
@@ -155,7 +153,7 @@ const SubscriptionInfoCard = memo(() => {
       </Box>
 
       {/* 信息列表 - flex:1 填充剩余空间 */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, position: 'relative', zIndex: 1, flex: 1, minHeight: 0, justifyContent: 'center' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, position: 'relative', zIndex: 1 }}>
         {[
           { label: '服务器地址', value: serverHost },
           { label: '协议', value: protocol },

@@ -113,9 +113,6 @@ const QuickConnectCard = memo(() => {
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
-        height: '100%',
-        minHeight: 0,
-        overflow: 'hidden',
       }}
     >
       {/* 标题 */}
@@ -178,9 +175,6 @@ const QuickConnectCard = memo(() => {
           borderRadius: 2,
           bgcolor: 'rgba(255, 255, 255, 0.02)',
           border: '1px solid rgba(255, 255, 255, 0.04)',
-          flex: 1,
-          minHeight: 0,
-          justifyContent: 'center',
         }}
       >
         {/* 当前节点 */}

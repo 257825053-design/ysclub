@@ -63,9 +63,6 @@ const NetworkSettingsCard = memo(() => {
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
-        height: '100%',
-        minHeight: 0,
-        overflow: 'hidden',
       }}
     >
       {/* 标题 */}
@@ -86,7 +83,7 @@ const NetworkSettingsCard = memo(() => {
       </Box>
 
       {/* 两个模式按钮 - 单选切换 */}
-      <Box sx={{ display: 'flex', gap: 1, flex: 1, minHeight: 0, alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
         {/* 系统代理 */}
         <Box
           onClick={() => handleModeSelect('system')}
