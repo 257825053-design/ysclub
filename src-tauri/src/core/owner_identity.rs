@@ -87,8 +87,8 @@ mod windows_owner {
         CloseHandle, ERROR_FILE_EXISTS, GENERIC_READ, GENERIC_WRITE, GetLastError, INVALID_HANDLE_VALUE, LUID, LocalFree,
     };
     use windows_sys::Win32::Security::Authorization::{
-        ConvertSidToStringSidW, ConvertStringSecurityDescriptorToSecurityDescriptorW, GetSecurityInfo,
-        LookupPrivilegeValueW, SDDL_REVISION_1, SE_FILE_OBJECT, SetSecurityInfo,
+        ConvertSidToStringSidW, ConvertStringSecurityDescriptorToSecurityDescriptorW, GetSecurityInfo, SDDL_REVISION_1,
+        SE_FILE_OBJECT, SetSecurityInfo,
     };
     use windows_sys::Win32::Security::{
         ACCESS_ALLOWED_ACE, ACL, AdjustTokenPrivileges, DACL_SECURITY_INFORMATION, EqualSid, GetAce,
@@ -113,6 +113,11 @@ mod windows_owner {
     /// we can take ownership of directories owned by another user (e.g. a leftover
     /// from a previous installation under a different SID). This is a no-op when the
     /// privilege is not present in the token (non-elevated processes).
+    ///
+    /// The LUID for `SeTakeOwnershipPrivilege` is a well-known constant (value 9)
+    /// that is identical on every Windows installation, so we hardcode it instead
+    /// of calling `LookupPrivilegeValueW` (which is not available in windows-sys 0.61
+    /// `Authorization` module).
     fn enable_take_ownership_privilege() {
         let mut token = std::ptr::null_mut();
         if unsafe { OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &mut token) } == 0 {
@@ -120,11 +125,8 @@ mod windows_owner {
         }
         let token = OwnedHandle(token);
 
-        let mut luid = LUID { LowPart: 0, HighPart: 0 };
-        let privilege_name: Vec<u16> = "SeTakeOwnershipPrivilege\0".encode_utf16().collect();
-        if unsafe { LookupPrivilegeValueW(std::ptr::null(), privilege_name.as_ptr(), &mut luid) } == 0 {
-            return;
-        }
+        // SE_TAKE_OWNERSHIP_PRIVILEGE = 9 — well-known LUID, consistent across all Windows systems.
+        let luid = LUID { LowPart: 9, HighPart: 0 };
 
         let privileges = TOKEN_PRIVILEGES {
             PrivilegeCount: 1,
