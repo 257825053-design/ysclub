@@ -57,48 +57,48 @@ const NetworkSettingsCard = memo(() => {
       sx={{
         height: '100%',
         minWidth: 0,
-        p: 1.5,
-        borderRadius: 2.5,
+        p: 1,
+        borderRadius: 2,
         background: '#131A2B',
         border: '1px solid rgba(255, 255, 255, 0.05)',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
         display: 'flex',
         flexDirection: 'column',
-        gap: 1,
+        gap: 0.5,
         overflow: 'hidden',
       }}
     >
       {/* 标题 */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
         <SvgIcon
           component={iconDark}
-          sx={{ width: 18, height: 18, flexShrink: 0, opacity: 0.9 }}
+          sx={{ width: 16, height: 16, flexShrink: 0, opacity: 0.9 }}
           inheritViewBox
         />
         <Box>
-          <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
+          <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.2 }}>
             网络设置
           </Typography>
-          <Typography sx={{ fontSize: 9, color: '#8A98B5', letterSpacing: '1px', fontWeight: 500 }}>
+          <Typography sx={{ fontSize: 8, color: '#8A98B5', letterSpacing: '1px', fontWeight: 500 }}>
             NETWORK
           </Typography>
         </Box>
       </Box>
 
       {/* 两个模式按钮 - 单选切换 */}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flex: 1, alignContent: 'center' }}>
+      <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', flex: 1, alignContent: 'center' }}>
         {/* 系统代理 */}
         <Box
           onClick={() => handleModeSelect('system')}
           sx={{
             flex: 1,
-            py: 1,
-            px: 1,
-            borderRadius: 2,
+            py: 0.5,
+            px: 0.5,
+            borderRadius: 1.5,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 0.5,
+            gap: 0.25,
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             bgcolor: selectedMode === 'system' ? alpha('#2378F5', 0.12) : 'rgba(255, 255, 255, 0.02)',
@@ -112,11 +112,11 @@ const NetworkSettingsCard = memo(() => {
         >
           <LaptopOutlined
             sx={{
-              fontSize: 22,
+              fontSize: 18,
               color: selectedMode === 'system' ? '#2378F5' : '#64748B',
             }}
           />
-          <Typography sx={{ fontSize: 11, fontWeight: 600, color: selectedMode === 'system' ? '#2378F5' : '#8A98B5' }}>
+          <Typography sx={{ fontSize: 10, fontWeight: 600, color: selectedMode === 'system' ? '#2378F5' : '#8A98B5' }}>
             系统代理
           </Typography>
         </Box>
@@ -126,13 +126,13 @@ const NetworkSettingsCard = memo(() => {
           onClick={() => handleModeSelect('tun')}
           sx={{
             flex: 1,
-            py: 1,
-            px: 1,
-            borderRadius: 2,
+            py: 0.5,
+            px: 0.5,
+            borderRadius: 1.5,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 0.5,
+            gap: 0.25,
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             bgcolor: selectedMode === 'tun' ? alpha('#2378F5', 0.12) : 'rgba(255, 255, 255, 0.02)',
@@ -146,11 +146,11 @@ const NetworkSettingsCard = memo(() => {
         >
           <LanOutlined
             sx={{
-              fontSize: 22,
+              fontSize: 18,
               color: selectedMode === 'tun' ? '#2378F5' : '#64748B',
             }}
           />
-          <Typography sx={{ fontSize: 11, fontWeight: 600, color: selectedMode === 'tun' ? '#2378F5' : '#8A98B5' }}>
+          <Typography sx={{ fontSize: 10, fontWeight: 600, color: selectedMode === 'tun' ? '#2378F5' : '#8A98B5' }}>
             虚拟网卡模式
           </Typography>
         </Box>
@@ -162,17 +162,17 @@ const NetworkSettingsCard = memo(() => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          pt: 1,
+          pt: 0.5,
           borderTop: '1px solid rgba(255, 255, 255, 0.05)',
           flexShrink: 0,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <CheckCircleOutlineOutlined sx={{ fontSize: 16, color: '#36D399' }} />
-          <Typography sx={{ fontSize: 12, color: '#D0D8E8', fontWeight: 500 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <CheckCircleOutlineOutlined sx={{ fontSize: 14, color: '#36D399' }} />
+          <Typography sx={{ fontSize: 11, color: '#D0D8E8', fontWeight: 500 }}>
             {selectedMode === 'system' ? '系统代理' : '虚拟网卡'}
           </Typography>
-          <SettingsOutlined sx={{ fontSize: 14, color: '#64748B', cursor: 'pointer' }} />
+          <SettingsOutlined sx={{ fontSize: 13, color: '#64748B', cursor: 'pointer' }} />
         </Box>
         {/* 永久锁定开启的开关 - 禁用点击 */}
         <Switch

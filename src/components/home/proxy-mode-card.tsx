@@ -31,9 +31,9 @@ const ProxyModeCard = memo(() => {
   const currentMode = optimisticMode || clashConfig?.mode?.toLowerCase() || 'rule'
 
   const modes = [
-    { key: 'rule', label: '规则', icon: <CallSplitOutlined sx={{ fontSize: 20 }} /> },
-    { key: 'global', label: '全局', icon: <LanguageOutlined sx={{ fontSize: 20 }} /> },
-    { key: 'direct', label: '直连', icon: <DiamondOutlined sx={{ fontSize: 20 }} /> },
+    { key: 'rule', label: '规则', icon: <CallSplitOutlined sx={{ fontSize: 16 }} /> },
+    { key: 'global', label: '全局', icon: <LanguageOutlined sx={{ fontSize: 16 }} /> },
+    { key: 'direct', label: '直连', icon: <DiamondOutlined sx={{ fontSize: 16 }} /> },
   ]
 
   const handleModeChange = useLockFn(async (mode: string) => {
@@ -64,36 +64,36 @@ const ProxyModeCard = memo(() => {
       sx={{
         height: '100%',
         minWidth: 0,
-        p: 1.5,
-        borderRadius: 2.5,
+        p: 1,
+        borderRadius: 2,
         background: '#131A2B',
         border: '1px solid rgba(255, 255, 255, 0.05)',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
         display: 'flex',
         flexDirection: 'column',
-        gap: 1,
+        gap: 0.5,
         overflow: 'hidden',
       }}
     >
       {/* 标题 */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
         <SvgIcon
           component={iconDark}
-          sx={{ width: 18, height: 18, flexShrink: 0, opacity: 0.9 }}
+          sx={{ width: 16, height: 16, flexShrink: 0, opacity: 0.9 }}
           inheritViewBox
         />
         <Box>
-          <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
+          <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.2 }}>
             代理模式
           </Typography>
-          <Typography sx={{ fontSize: 9, color: '#8A98B5', letterSpacing: '1px', fontWeight: 500 }}>
+          <Typography sx={{ fontSize: 8, color: '#8A98B5', letterSpacing: '1px', fontWeight: 500 }}>
             MODE
           </Typography>
         </Box>
       </Box>
 
       {/* 三个模式按钮 */}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flex: 1, alignContent: 'center' }}>
+      <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', flex: 1, alignContent: 'center' }}>
         {modes.map((mode) => {
           const isActive = currentMode === mode.key
           return (
@@ -102,13 +102,13 @@ const ProxyModeCard = memo(() => {
               onClick={() => handleModeChange(mode.key)}
               sx={{
                 flex: 1,
-                py: 1,
-                px: 1,
-                borderRadius: 2,
+                py: 0.5,
+                px: 0.5,
+                borderRadius: 1.5,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: 0.5,
+                gap: 0.25,
                 cursor: isCoreDataPending ? 'default' : 'pointer',
                 transition: 'all 0.2s ease',
                 bgcolor: isActive ? alpha('#2378F5', 0.12) : 'rgba(255, 255, 255, 0.02)',
@@ -125,7 +125,7 @@ const ProxyModeCard = memo(() => {
               </Box>
               <Typography
                 sx={{
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: isActive ? 600 : 500,
                   color: isActive ? '#2378F5' : '#8A98B5',
                 }}
@@ -140,15 +140,15 @@ const ProxyModeCard = memo(() => {
       {/* 说明文字 */}
       <Typography
         sx={{
-          fontSize: 11,
+          fontSize: 10,
           color: '#8A98B5',
-          lineHeight: 1.5,
-          pt: 1,
+          lineHeight: 1.4,
+          pt: 0.5,
           borderTop: '1px solid rgba(255, 255, 255, 0.05)',
           flexShrink: 0,
         }}
       >
-        基于预设规则智能判断流量走向，提供灵活的代理策略
+        基于预设规则智能判断流量走向
       </Typography>
     </Box>
   )

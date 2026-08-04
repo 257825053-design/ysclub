@@ -81,7 +81,7 @@ const QuickToolsCard = memo(() => {
   return (
     <Box
       sx={{
-        p: 1,
+        p: 1.5,
         borderRadius: 2.5,
         background: '#131A2B',
         border: '1px solid rgba(255, 255, 255, 0.05)',
@@ -89,7 +89,7 @@ const QuickToolsCard = memo(() => {
       }}
     >
       {/* 标题 */}
-      <Box sx={{ mb: 0.5, display: 'flex', alignItems: 'center', gap: 0.75 }}>
+      <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.75 }}>
         <SvgIcon
           component={iconDark}
           sx={{ width: 18, height: 18, flexShrink: 0, opacity: 0.9 }}
@@ -110,7 +110,7 @@ const QuickToolsCard = memo(() => {
         sx={{
           display: 'grid',
           gridTemplateColumns: { xs: 'repeat(3, 1fr)', sm: 'repeat(5, 1fr)' },
-          gap: 0.75,
+          gap: 1,
         }}
       >
         {tools.map((tool) => (
@@ -129,8 +129,8 @@ const QuickToolsCard = memo(() => {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 0.2,
-              py: 0.5,
+              gap: 0.4,
+              py: 1,
               px: 0.5,
               borderRadius: 1.5,
               cursor: tool.disabled ? 'default' : 'pointer',
@@ -153,9 +153,9 @@ const QuickToolsCard = memo(() => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: 24,
-                height: 24,
-                borderRadius: 1.5,
+                width: 32,
+                height: 32,
+                borderRadius: 2,
                 bgcolor: alpha(tool.color, tool.disabled ? 0.05 : 0.1),
                 color: tool.disabled ? alpha(tool.color, 0.5) : tool.color,
                 transition: 'all 0.2s ease',
@@ -166,7 +166,7 @@ const QuickToolsCard = memo(() => {
             <Box sx={{ textAlign: 'center' }}>
               <Typography
                 sx={{
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: 600,
                   color: tool.disabled ? '#8A98B5' : '#FFFFFF',
                   lineHeight: 1.3,
