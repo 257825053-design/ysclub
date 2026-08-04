@@ -64,14 +64,14 @@ const ProxyModeCard = memo(() => {
       sx={{
         height: '100%',
         minWidth: 0,
-        p: 1,
+        p: 0.75,
         borderRadius: 2,
         background: '#131A2B',
         border: '1px solid rgba(255, 255, 255, 0.05)',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
         display: 'flex',
         flexDirection: 'column',
-        gap: 0.5,
+        gap: 0.25,
         overflow: 'hidden',
       }}
     >
@@ -102,7 +102,7 @@ const ProxyModeCard = memo(() => {
               onClick={() => handleModeChange(mode.key)}
               sx={{
                 flex: 1,
-                py: 0.5,
+                py: 0.25,
                 px: 0.5,
                 borderRadius: 1.5,
                 display: 'flex',

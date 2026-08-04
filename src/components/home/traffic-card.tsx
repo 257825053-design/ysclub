@@ -34,14 +34,14 @@ const TrafficCard = memo(() => {
     <Box
       sx={{
         height: '100%',
-        p: 1,
+        p: 0.75,
         borderRadius: 2,
         background: '#12192B',
         border: '1px solid rgba(255, 255, 255, 0.05)',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
         display: 'flex',
         flexDirection: 'column',
-        gap: 0.5,
+        gap: 0.25,
         minWidth: 0,
         overflow: 'hidden',
       }}
@@ -106,7 +106,7 @@ const TrafficCard = memo(() => {
       <Box
         sx={{
           flex: 1,
-          minHeight: 50,
+          minHeight: 38,
           borderRadius: 1,
           overflow: 'hidden',
           bgcolor: 'rgba(0, 0, 0, 0.2)',
@@ -124,7 +124,7 @@ const TrafficCard = memo(() => {
           alignItems: 'center',
           pt: 0.5,
           borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-          height: 34,
+          height: 28,
           flexShrink: 0,
         }}
       >
