@@ -63,6 +63,7 @@ const ProxyModeCard = memo(() => {
     <Box
       sx={{
         height: '100%',
+        minWidth: 0,
         p: 1.5,
         borderRadius: 2.5,
         background: '#131A2B',
@@ -71,10 +72,11 @@ const ProxyModeCard = memo(() => {
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
+        overflow: 'hidden',
       }}
     >
       {/* 标题 */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0 }}>
         <SvgIcon
           component={iconDark}
           sx={{ width: 18, height: 18, flexShrink: 0, opacity: 0.9 }}
@@ -91,7 +93,7 @@ const ProxyModeCard = memo(() => {
       </Box>
 
       {/* 三个模式按钮 */}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flex: 1, alignContent: 'center' }}>
         {modes.map((mode) => {
           const isActive = currentMode === mode.key
           return (

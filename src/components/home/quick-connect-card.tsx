@@ -106,6 +106,7 @@ const QuickConnectCard = memo(() => {
     <Box
       sx={{
         height: '100%',
+        minWidth: 0,
         p: 1.5,
         borderRadius: 2.5,
         background: '#131A2B',
@@ -114,10 +115,11 @@ const QuickConnectCard = memo(() => {
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
+        overflow: 'hidden',
       }}
     >
       {/* 标题 */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0 }}>
         <SvgIcon
           component={iconDark}
           sx={{ width: 18, height: 18, flexShrink: 0, opacity: 0.9 }}
@@ -176,6 +178,8 @@ const QuickConnectCard = memo(() => {
           borderRadius: 2,
           bgcolor: 'rgba(255, 255, 255, 0.02)',
           border: '1px solid rgba(255, 255, 255, 0.04)',
+          flex: 1,
+          justifyContent: 'center',
         }}
       >
         {/* 当前节点 */}

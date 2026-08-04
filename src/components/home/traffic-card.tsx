@@ -105,7 +105,8 @@ const TrafficCard = memo(() => {
       {/* 流量图 - flex:1 自适应高度 */}
       <Box
         sx={{
-          height: 80,
+          flex: 1,
+          minHeight: 80,
           borderRadius: 1.5,
           overflow: 'hidden',
           bgcolor: 'rgba(0, 0, 0, 0.2)',

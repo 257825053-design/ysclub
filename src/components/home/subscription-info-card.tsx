@@ -73,6 +73,7 @@ const SubscriptionInfoCard = memo(() => {
     <Box
       sx={{
         height: '100%',
+        minWidth: 0,
         position: 'relative',
         p: 1.5,
         borderRadius: 2.5,
@@ -97,7 +98,7 @@ const SubscriptionInfoCard = memo(() => {
       `}</style>
 
       {/* 头部：应用图标 + 节点名 + 标签 + 波形 + 按钮 */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1, flexShrink: 0 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {/* 应用图标 */}
           <SvgIcon
@@ -154,7 +155,7 @@ const SubscriptionInfoCard = memo(() => {
       </Box>
 
       {/* 信息列表 - flex:1 填充剩余空间 */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, position: 'relative', zIndex: 1 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, position: 'relative', zIndex: 1, flex: 1, justifyContent: 'center' }}>
         {[
           { label: '服务器地址', value: serverHost },
           { label: '协议', value: protocol },

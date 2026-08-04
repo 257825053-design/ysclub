@@ -15,20 +15,21 @@ export const preloadHomePageCards = () => Promise.resolve()
 // ==================== 主页面 ====================
 
 /**
- * HomePage - 首页（CSS Grid 布局，所有行 auto 自然高度）
+ * HomePage - 首页（Flexbox 列布局）
  *
- * 核心策略：所有行使用 auto 高度，卡片取自然高度不拉伸
- * 整体居中对齐，内容溢出时允许滚动
+ * 核心策略：使用 flex-direction: column + flexShrink: 0
+ * 每一行取自然高度，绝对不会被压缩或重叠
+ * 内容超出容器时通过 overflow: auto 滚动
  *
  * 布局架构:
  * ┌──────────────────────────────────────┐
- * │  Hero Banner          auto           │
+ * │  Hero Banner         flexShrink:0    │
  * ├──────────────────────────────────────┤
- * │  订阅信息    │    快速连接   auto     │
+ * │  订阅信息    │    快速连接            │
  * ├──────────────────────────────────────┤
- * │  网络设置  │  代理模式  │  实时流量    │ auto
+ * │  网络设置  │  代理模式  │  实时流量    │
  * ├──────────────────────────────────────┤
- * │  快捷工具             auto            │
+ * │  快捷工具                             │
  * └──────────────────────────────────────┘
  */
 const HomePage = () => {
@@ -40,11 +41,8 @@ const HomePage = () => {
         overflow: 'auto',
         bgcolor: '#0B101C',
         boxSizing: 'border-box',
-        display: 'grid',
-        // 所有行 auto：卡片取自然高度，不拉伸不变形
-        gridTemplateRows: 'auto auto auto auto',
-        // 垂直方向从顶部开始排列
-        alignContent: 'start',
+        display: 'flex',
+        flexDirection: 'column',
         gap: '8px',
         p: '10px',
         // 美化滚动条
@@ -64,24 +62,24 @@ const HomePage = () => {
       }}
     >
       {/* ===== Row 1: Banner ===== */}
-      <Box sx={{ gridColumn: '1 / -1' }}>
+      <Box sx={{ flexShrink: 0, width: '100%' }}>
         <HeroBanner />
       </Box>
 
       {/* ===== Row 2: 订阅信息 + 快速连接 ===== */}
       <Box
         sx={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+          flexShrink: 0,
+          display: 'flex',
           gap: '8px',
-          // align-items 默认 stretch，配合 height:100% 让同行卡片等高
+          width: '100%',
           alignItems: 'stretch',
         }}
       >
-        <Box sx={{ minWidth: 0, height: '100%' }}>
+        <Box sx={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
           <SubscriptionInfoCard />
         </Box>
-        <Box sx={{ minWidth: 0, height: '100%' }}>
+        <Box sx={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
           <QuickConnectCard />
         </Box>
       </Box>
@@ -89,25 +87,26 @@ const HomePage = () => {
       {/* ===== Row 3: 网络设置 + 代理模式 + 实时流量 ===== */}
       <Box
         sx={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)',
+          flexShrink: 0,
+          display: 'flex',
           gap: '8px',
+          width: '100%',
           alignItems: 'stretch',
         }}
       >
-        <Box sx={{ minWidth: 0, height: '100%' }}>
+        <Box sx={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
           <NetworkSettingsCard />
         </Box>
-        <Box sx={{ minWidth: 0, height: '100%' }}>
+        <Box sx={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
           <ProxyModeCard />
         </Box>
-        <Box sx={{ minWidth: 0, height: '100%' }}>
+        <Box sx={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
           <TrafficCard />
         </Box>
       </Box>
 
       {/* ===== Row 4: 快捷工具 ===== */}
-      <Box sx={{ gridColumn: '1 / -1' }}>
+      <Box sx={{ flexShrink: 0, width: '100%' }}>
         <QuickToolsCard />
       </Box>
     </Box>
