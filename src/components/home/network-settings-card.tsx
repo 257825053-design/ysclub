@@ -55,6 +55,7 @@ const NetworkSettingsCard = memo(() => {
   return (
     <Box
       sx={{
+        height: '100%',
         p: 1.5,
         borderRadius: 2.5,
         background: '#131A2B',

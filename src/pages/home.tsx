@@ -74,12 +74,14 @@ const HomePage = () => {
           display: 'grid',
           gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
           gap: '8px',
+          // align-items 默认 stretch，配合 height:100% 让同行卡片等高
+          alignItems: 'stretch',
         }}
       >
-        <Box sx={{ minWidth: 0 }}>
+        <Box sx={{ minWidth: 0, height: '100%' }}>
           <SubscriptionInfoCard />
         </Box>
-        <Box sx={{ minWidth: 0 }}>
+        <Box sx={{ minWidth: 0, height: '100%' }}>
           <QuickConnectCard />
         </Box>
       </Box>
@@ -90,15 +92,16 @@ const HomePage = () => {
           display: 'grid',
           gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)',
           gap: '8px',
+          alignItems: 'stretch',
         }}
       >
-        <Box sx={{ minWidth: 0 }}>
+        <Box sx={{ minWidth: 0, height: '100%' }}>
           <NetworkSettingsCard />
         </Box>
-        <Box sx={{ minWidth: 0 }}>
+        <Box sx={{ minWidth: 0, height: '100%' }}>
           <ProxyModeCard />
         </Box>
-        <Box sx={{ minWidth: 0 }}>
+        <Box sx={{ minWidth: 0, height: '100%' }}>
           <TrafficCard />
         </Box>
       </Box>

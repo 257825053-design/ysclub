@@ -72,6 +72,7 @@ const SubscriptionInfoCard = memo(() => {
   return (
     <Box
       sx={{
+        height: '100%',
         position: 'relative',
         p: 1.5,
         borderRadius: 2.5,
