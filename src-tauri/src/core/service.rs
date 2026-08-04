@@ -898,6 +898,36 @@ pub(super) async fn start_with_existing_service(config_file: &Path) -> Result<()
         let err_msg = response.message;
         logging!(error, Type::Service, "启动核心失败: {}", err_msg);
         start_owner_monitor();
+
+        // Recovery: when the service reports an ownership mismatch, delete the
+        // stale owner token so it gets recreated with correct ownership on the
+        // next retry. The directory ownership is fixed proactively by
+        // `ensure_directory_security` in `current_owner_credentials`.
+        #[cfg(target_os = "windows")]
+        if err_msg.contains("unexpected owner") {
+            if let Ok(app_home) = dirs::app_home_dir() {
+                let token_path = app_home.join(clash_verge_service_ipc::OWNER_TOKEN_FILE_NAME);
+                if token_path.exists() {
+                    match std::fs::remove_file(&token_path) {
+                        Ok(()) => {
+                            logging!(
+                                info,
+                                Type::Service,
+                                "Deleted stale owner token for recovery after ownership mismatch"
+                            );
+                        }
+                        Err(e) => {
+                            logging!(
+                                warn,
+                                Type::Service,
+                                "Failed to delete owner token for recovery: {e}"
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
         bail!(err_msg);
     }
 

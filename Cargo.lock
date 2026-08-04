@@ -1142,6 +1142,7 @@ dependencies = [
  "open",
  "parking_lot",
  "percent-encoding",
+ "raw-window-handle",
  "regex",
  "reqwest 0.13.4",
  "reqwest_dav",

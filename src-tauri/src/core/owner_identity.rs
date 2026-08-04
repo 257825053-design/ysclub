@@ -41,6 +41,7 @@ pub(crate) fn current_owner_credentials_for_root(app_root: &Path) -> Result<Owne
 #[cfg(windows)]
 fn windows_owner_credentials(app_data_root: &Path) -> Result<(OwnerIdentity, Option<String>)> {
     let sid = windows_owner::current_sid()?;
+    windows_owner::ensure_directory_security(app_data_root, &sid)?;
     let token = windows_owner::load_or_create_token(app_data_root, &sid)?;
     Ok((OwnerIdentity::Windows { sid }, Some(token)))
 }
@@ -83,28 +84,172 @@ mod windows_owner {
     use std::os::windows::io::{AsRawHandle as _, FromRawHandle as _};
     use std::path::Path;
     use windows_sys::Win32::Foundation::{
-        CloseHandle, ERROR_FILE_EXISTS, GENERIC_READ, GENERIC_WRITE, GetLastError, INVALID_HANDLE_VALUE, LocalFree,
+        CloseHandle, ERROR_FILE_EXISTS, GENERIC_READ, GENERIC_WRITE, GetLastError, INVALID_HANDLE_VALUE, LUID, LocalFree,
     };
     use windows_sys::Win32::Security::Authorization::{
-        ConvertSidToStringSidW, ConvertStringSecurityDescriptorToSecurityDescriptorW, GetSecurityInfo, SDDL_REVISION_1,
-        SE_FILE_OBJECT, SetSecurityInfo,
+        ConvertSidToStringSidW, ConvertStringSecurityDescriptorToSecurityDescriptorW, GetSecurityInfo,
+        LookupPrivilegeValueW, SDDL_REVISION_1, SE_FILE_OBJECT, SetSecurityInfo,
     };
     use windows_sys::Win32::Security::{
-        ACCESS_ALLOWED_ACE, ACL, DACL_SECURITY_INFORMATION, EqualSid, GetAce, GetSecurityDescriptorControl,
-        GetSecurityDescriptorDacl, GetSecurityDescriptorOwner, GetTokenInformation, IsValidSid, IsWellKnownSid,
-        OWNER_SECURITY_INFORMATION, PROTECTED_DACL_SECURITY_INFORMATION, PSECURITY_DESCRIPTOR, PSID, SE_DACL_PROTECTED,
-        SECURITY_ATTRIBUTES, TOKEN_QUERY, TOKEN_USER, TokenUser, WinBuiltinAdministratorsSid, WinLocalSystemSid,
+        ACCESS_ALLOWED_ACE, ACL, AdjustTokenPrivileges, DACL_SECURITY_INFORMATION, EqualSid, GetAce,
+        GetSecurityDescriptorControl, GetSecurityDescriptorDacl, GetSecurityDescriptorOwner, GetTokenInformation,
+        IsValidSid, IsWellKnownSid, LUID_AND_ATTRIBUTES, OWNER_SECURITY_INFORMATION,
+        PROTECTED_DACL_SECURITY_INFORMATION, PSECURITY_DESCRIPTOR, PSID, SE_DACL_PROTECTED, SE_PRIVILEGE_ENABLED,
+        SECURITY_ATTRIBUTES, TOKEN_ADJUST_PRIVILEGES, TOKEN_QUERY, TOKEN_PRIVILEGES, TOKEN_USER, TokenUser,
+        WinBuiltinAdministratorsSid, WinLocalSystemSid,
     };
     use windows_sys::Win32::Storage::FileSystem::{
         BY_HANDLE_FILE_INFORMATION, CREATE_NEW, CreateFileW, FILE_ALL_ACCESS, FILE_ATTRIBUTE_DIRECTORY,
-        FILE_ATTRIBUTE_HIDDEN, FILE_ATTRIBUTE_NORMAL, FILE_ATTRIBUTE_REPARSE_POINT, FILE_FLAG_OPEN_REPARSE_POINT,
-        FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE, FILE_TYPE_DISK, GetFileInformationByHandle, GetFileType,
-        OPEN_EXISTING, READ_CONTROL, WRITE_DAC,
+        FILE_ATTRIBUTE_HIDDEN, FILE_ATTRIBUTE_NORMAL, FILE_ATTRIBUTE_REPARSE_POINT, FILE_FLAG_BACKUP_SEMANTICS,
+        FILE_FLAG_OPEN_REPARSE_POINT, FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE, FILE_TYPE_DISK,
+        GetFileInformationByHandle, GetFileType, OPEN_EXISTING, READ_CONTROL, WRITE_DAC, WRITE_OWNER,
     };
     use windows_sys::Win32::System::Threading::{GetCurrentProcess, OpenProcessToken};
 
     const TOKEN_BYTES: usize = 32;
     const ACCESS_ALLOWED_ACE_TYPE: u8 = 0;
+
+    /// Enable the `SeTakeOwnershipPrivilege` in the current process token so that
+    /// we can take ownership of directories owned by another user (e.g. a leftover
+    /// from a previous installation under a different SID). This is a no-op when the
+    /// privilege is not present in the token (non-elevated processes).
+    fn enable_take_ownership_privilege() {
+        let mut token = std::ptr::null_mut();
+        if unsafe { OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &mut token) } == 0 {
+            return;
+        }
+        let token = OwnedHandle(token);
+
+        let mut luid = LUID { LowPart: 0, HighPart: 0 };
+        let privilege_name: Vec<u16> = "SeTakeOwnershipPrivilege\0".encode_utf16().collect();
+        if unsafe { LookupPrivilegeValueW(std::ptr::null(), privilege_name.as_ptr(), &mut luid) } == 0 {
+            return;
+        }
+
+        let privileges = TOKEN_PRIVILEGES {
+            PrivilegeCount: 1,
+            Privileges: [LUID_AND_ATTRIBUTES {
+                Luid: luid,
+                Attributes: SE_PRIVILEGE_ENABLED,
+            }],
+        };
+
+        let _ = unsafe {
+            AdjustTokenPrivileges(token.0, 0, &privileges, 0, std::ptr::null_mut(), std::ptr::null_mut())
+        };
+    }
+
+    /// Ensure that `app_data_root` is owned by the current user and has a
+    /// protected DACL granting full access only to the user, SYSTEM, and
+    /// Administrators. This prevents the service from rejecting credentials
+    /// with "owner credential path has an unexpected owner" when the directory
+    /// was previously created by a different user or installation.
+    pub(super) fn ensure_directory_security(app_data_root: &Path, sid: &str) -> Result<()> {
+        let descriptor = LocalSecurityDescriptor::from_sid(sid)?;
+        let expected_owner = descriptor.owner()?;
+        let wide = wide_path(app_data_root)?;
+
+        // Try opening with WRITE_OWNER | WRITE_DAC first (works when we already
+        // have access). If that fails, enable SeTakeOwnershipPrivilege and retry.
+        let handle = unsafe {
+            CreateFileW(
+                wide.as_ptr(),
+                WRITE_OWNER | WRITE_DAC | READ_CONTROL,
+                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                std::ptr::null(),
+                OPEN_EXISTING,
+                FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
+                std::ptr::null_mut(),
+            )
+        };
+
+        if handle == INVALID_HANDLE_VALUE {
+            // Directory might not exist yet, or we lack WRITE_OWNER access.
+            let last_error = unsafe { GetLastError() };
+            // ERROR_FILE_NOT_FOUND (2) or ERROR_PATH_NOT_FOUND (3): directory doesn't exist yet.
+            if last_error == 2 || last_error == 3 {
+                return Ok(());
+            }
+
+            // Try enabling SeTakeOwnershipPrivilege and retry.
+            enable_take_ownership_privilege();
+            let retry_handle = unsafe {
+                CreateFileW(
+                    wide.as_ptr(),
+                    WRITE_OWNER | WRITE_DAC | READ_CONTROL,
+                    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                    std::ptr::null(),
+                    OPEN_EXISTING,
+                    FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
+                    std::ptr::null_mut(),
+                )
+            };
+            if retry_handle == INVALID_HANDLE_VALUE {
+                // Cannot fix the directory ownership; let the service validation
+                // handle it. The caller will get a clear error from the service.
+                return Ok(());
+            }
+            fix_directory_owner_and_dacl(retry_handle, &descriptor, expected_owner)?;
+            return Ok(());
+        }
+
+        fix_directory_owner_and_dacl(handle, &descriptor, expected_owner)?;
+        Ok(())
+    }
+
+    fn fix_directory_owner_and_dacl(
+        handle: *mut c_void,
+        descriptor: &LocalSecurityDescriptor,
+        expected_owner: PSID,
+    ) -> Result<()> {
+        let handle = OwnedHandle(handle);
+
+        // Check the current owner.
+        let mut owner: PSID = std::ptr::null_mut();
+        let mut security = std::ptr::null_mut();
+        let status = unsafe {
+            GetSecurityInfo(
+                handle.0,
+                SE_FILE_OBJECT,
+                OWNER_SECURITY_INFORMATION,
+                &mut owner,
+                std::ptr::null_mut(),
+                std::ptr::null_mut(),
+                std::ptr::null_mut(),
+                &mut security,
+            )
+        };
+
+        let owner_matches = if status != 0 || security.is_null() {
+            false
+        } else {
+            let _security = LocalSecurityDescriptor(security);
+            !owner.is_null() && unsafe { EqualSid(owner, expected_owner) } != 0
+        };
+
+        if !owner_matches {
+            // Take ownership.
+            let set_status = unsafe {
+                SetSecurityInfo(
+                    handle.0,
+                    SE_FILE_OBJECT,
+                    OWNER_SECURITY_INFORMATION,
+                    expected_owner,
+                    std::ptr::null_mut(),
+                    std::ptr::null_mut(),
+                    std::ptr::null(),
+                )
+            };
+            if set_status != 0 {
+                return Err(std::io::Error::from_raw_os_error(set_status as i32))
+                    .context("failed to set app_data_dir owner to current user");
+            }
+        }
+
+        // Apply the protected DACL (user + SYSTEM + Administrators only).
+        descriptor.apply_dacl(handle.0)?;
+        Ok(())
+    }
 
     pub(super) fn current_sid() -> Result<String> {
         let mut token = std::ptr::null_mut();
