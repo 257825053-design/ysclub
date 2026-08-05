@@ -141,8 +141,22 @@ jobs:
           fi
           echo "✓ Rust target ${{ matrix.target }} verified."
 
+      - name: Check Apple Certificate
+        id: check_apple_cert
+        if: matrix.os == 'macos-latest' && github.event.inputs[matrix.input] == 'true'
+        env:
+          APPLE_CERT: ${{ secrets.APPLE_CERTIFICATE }}
+        run: |
+          if [ -n "$APPLE_CERT" ]; then
+            echo "has_cert=true" >> "$GITHUB_OUTPUT"
+            echo "Apple certificate found, signing will be enabled"
+          else
+            echo "has_cert=false" >> "$GITHUB_OUTPUT"
+            echo "No Apple certificate found, signing will be skipped"
+          fi
+
       - name: Prepare macOS Code Signing
-        if: matrix.os == 'macos-latest' && github.event.inputs[matrix.input] == 'true' && secrets.APPLE_CERTIFICATE != ''
+        if: matrix.os == 'macos-latest' && github.event.inputs[matrix.input] == 'true' && steps.check_apple_cert.outputs.has_cert == 'true'
         env:
           APPLE_CERT: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERT_PASS: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
