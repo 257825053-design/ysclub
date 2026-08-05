@@ -129,6 +129,7 @@ jobs:
 
       - name: Verify Rust Target
         if: github.event.inputs[matrix.input] == 'true'
+        shell: bash
         run: |
           rustup target list --installed
           if ! rustup target list --installed | grep -q "${{ matrix.target }}"; then
@@ -144,6 +145,7 @@ jobs:
       - name: Check Apple Certificate
         id: check_apple_cert
         if: matrix.os == 'macos-latest' && github.event.inputs[matrix.input] == 'true'
+        shell: bash
         env:
           APPLE_CERT: ${{ secrets.APPLE_CERTIFICATE }}
         run: |
